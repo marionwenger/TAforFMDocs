@@ -7,7 +7,7 @@ data_version_id = 1
 random_seed: int = 1404
 
 # Load the HTML file
-file_path_data = Path(f'data/I_documents_{data_input_version_id}.htm')
+file_path_data = Path(f'data/I_exports_{data_input_version_id}.htm')
 
 # TODO IF HTML - UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe4 in position 429: invalid continuation byte
 # File "<frozen codecs>", line 322, in decode
@@ -28,10 +28,10 @@ file_path_data = Path(f'data/I_documents_{data_input_version_id}.htm')
 #
 # # Convert the first table to a DataFrame
 # # You can use 'pd.read_html()' on the HTML string of the table
-# documents: pd.DataFrame = pd.read_html(str(tables[0]))[0]
-# print(documents.head())
-documents = pd.DataFrame((14, 4, 1980))
+# exports: pd.DataFrame = pd.read_html(str(tables[0]))[0]
+# print(exports.head())
+exports = pd.DataFrame((14, 4, 1980))
 
 # TODO save csv
-# file_path_csv = os.path.join('intermed_results', f'''O_documents_{data_input_version_id}.csv''')
-# documents.to_csv(file_path_csv)
+# file_path_csv = os.path.join('intermed_results', f'''O_exports_{data_input_version_id}.csv''')
+# exports.to_csv(file_path_csv)

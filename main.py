@@ -9,11 +9,11 @@
 # %%
 import steps.t01_Import as t01
 
-print(t01.documents.head)
+print(t01.exports[0:1])
 
 import steps.t02_Transform as t02
 
-print(t02.documents.head)
+print(t02.exports[0:1])
 
 # TODO add tests for steps
 # tests.add_test_result('equal columns in both study tables'
