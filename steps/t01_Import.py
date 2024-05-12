@@ -1,20 +1,20 @@
+from pathlib import Path
+
 import pandas as pd
 
 data_input_version_id = 'div_1.0'
 data_version_id = 1
 random_seed: int = 1404
 
-# TODO ONLY IF sure that input will be as htm...
+# Load the HTML file
+file_path_data = Path(f'data/I_documents_{data_input_version_id}.htm')
 
-# TODO does not find file??? did find it before... tried both pathlib and os... - I suspect this will be solved with main.py
-# # Load the HTML file
-# file_path_data = Path(f'data/I_documents_{data_input_version_id}.htm')
-# # file_path_data = os.path.join('data', f'''I_documents_{data_input_version_id}.htm''')
-#
-# # Read the HTML content
+# TODO IF HTML - UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe4 in position 429: invalid continuation byte
+# File "<frozen codecs>", line 322, in decode
+# Read the HTML content
 # with open(file_path_data, 'r', encoding='utf-8') as file:
 #     html_content = file.read()
-#
+
 # # Use BeautifulSoup to parse the HTML
 # soup = BeautifulSoup(html_content, 'html.parser')
 #
