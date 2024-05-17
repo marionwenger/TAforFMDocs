@@ -379,3 +379,5 @@ zict @ file:///private/var/folders/c_/qfmhj66j0tn016nkx_th4hxm0000gp/T/abs_ed6_o
 zipp @ file:///private/var/folders/c_/qfmhj66j0tn016nkx_th4hxm0000gp/T/abs_c8z3y7z1g1/croot/zipp_1704206911704/work
 zope.interface @ file:///Users/ec2-user/ci_py311/zope.interface_1678379536727/work
 zstandard @ file:///Users/ec2-user/ci_py311_2/zstandard_1679338593428/work
+
+beautifulsoup4~=4.12.3
