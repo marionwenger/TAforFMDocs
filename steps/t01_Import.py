@@ -9,7 +9,7 @@ random_seed: int = 1404
 # Load the HTML file
 file_path_data = Path(f'data/I_exports_{data_input_version_id}.htm')
 
-# TODO IF HTML - UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe4 in position 429: invalid continuation byte
+# TODO NOW UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe4 in position 429: invalid continuation byte
 # File "<frozen codecs>", line 322, in decode
 # Read the HTML content
 # with open(file_path_data, 'r', encoding='utf-8') as file:
@@ -32,6 +32,6 @@ file_path_data = Path(f'data/I_exports_{data_input_version_id}.htm')
 # print(exports.head())
 exports = pd.DataFrame((14, 4, 1980))
 
-# TODO save csv
+# TODO NOW save csv
 # file_path_csv = os.path.join('intermed_results', f'''O_exports_{data_input_version_id}.csv''')
 # exports.to_csv(file_path_csv)

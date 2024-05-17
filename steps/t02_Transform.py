@@ -7,6 +7,8 @@ print(exports[0:0])
 
 # TODO split into two tables - cases and documents with a new internal document ID...
 
+# TODO LATER adapt code: fName_Vorname_Kind will be missing as a column (new export by Emi)
+
 # List of columns for each new DataFrame
 # TODO rename
 cases_columns = ['ID_FM', 'fName_Vorname_Kind', 'ID_Fall', 'fAnmeldedatum', ]

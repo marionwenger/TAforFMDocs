@@ -15,10 +15,6 @@ import steps.t02_Transform as t02
 
 print(t02.exports[0:1])
 
-# TODO add tests for steps
-# tests.add_test_result('equal columns in both study tables'
-#                       , tf.test_for_equal_columns(m01.epokids.dtypes, m01.teenhearts.dtypes))
-
 # %%
 # TODO LATER add tests
 # import steps.m03_Preprocess as m03
