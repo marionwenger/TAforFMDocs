@@ -1,9 +1,12 @@
-import pandas as pd
+# from t01_Import import data_input_version_id # TODO NOW rewrite main
+from functions import functions as f
 
-from t01_Import import data_input_version_id
+debug = False
 
-exports: pd.DataFrame = pd.read_csv(f'intermed_results/O_exports_{data_input_version_id}.csv', sep=',', header=0)
-print(exports[0:0])
+f.print_if_debug(debug, 'started with t02')
+
+# exports: pd.DataFrame = pd.read_csv(f'intermed_results/O_exports_{data_input_version_id}.csv', sep=',', header=0)
+# f.print_if_debug(debug, exports[0:0])
 
 # TODO split into two tables - cases and documents with a new internal document ID...
 
@@ -15,13 +18,13 @@ cases_columns = ['ID_FM', 'fName_Vorname_Kind', 'ID_Fall', 'fAnmeldedatum', ]
 documents_columns = ['filename', 'TextMBSVisionLength', 'TextMBSVision']
 
 # Create new DataFrames
-cases = exports[cases_columns]
-documents = exports[documents_columns]
+# cases = exports[cases_columns]
+# documents = exports[documents_columns]
 
 # Reset index to create a new unique ID for each row
 # TODO why is this bijective?
-cases.reset_index(drop=True, inplace=True)
-documents.reset_index(drop=True, inplace=True)
+# cases.reset_index(drop=True, inplace=True)
+# documents.reset_index(drop=True, inplace=True)
 
 # Add a new ID column to both DataFrames
 # TODO use loc instead
@@ -31,7 +34,7 @@ documents.reset_index(drop=True, inplace=True)
 # TODO change order of columns
 
 # # Print the new DataFrames
-# print("cases:")
-# print(cases.head)
-# print("\ndocuments:")
-# print(documents)
+# f.print_if_debug(debug, "cases:")
+# f.print_if_debug(debug, cases.head)
+# f.print_if_debug(debug, "\ndocuments:")
+# f.print_if_debug(debug, documents)

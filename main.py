@@ -6,19 +6,24 @@
 # evals: mf.EvalTable = mf.EvalTable(4)  # precision in digits
 # bad_modells: list[int] = []  # are not trained and printed
 
+# %% GLOBAL VARIABLES
+main_debug = False
+
 # %%
-import steps.t01_Import as t01
+from functions import functions as f
 
-print(t01.exports[0:1])
+f.print_if_debug(main_debug, 'started with main')
 
-import steps.t02_Transform as t02
+# %%
 
-print(t02.exports[0:1])
+f.print_if_debug(main_debug, 'imported t01 into main')
+
+f.print_if_debug(main_debug, 'imported t02 into main')
 
 # %%
 # TODO LATER add tests
 # import steps.m03_Preprocess as m03
-#
+
 # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
 #                                 , 'z-transformed (SimpleImputer)', 'one-hot'
 #                                 , 'No', m03.test_size, 'no test of normal distribution, no check of outliers')
