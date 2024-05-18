@@ -4,8 +4,8 @@ from functions import functions as f
 
 
 # TODO NOW split into two tables - cases and documents with a new internal document ID...
-def split(fm_exports: pd.DataFrame, debugging: bool = False) -> (pd.DataFrame, pd.DataFrame):
-    f.print_if_debugging(debugging, 'started with t02')
+def split(fm_exports: pd.DataFrame, printing_steps: bool = False) -> (pd.DataFrame, pd.DataFrame):
+    f.print_steps('started with t02', printing_steps)
 
     # TODO LATER adapt code: fName_Vorname_Kind will be missing as a column (new export by Emi)
 

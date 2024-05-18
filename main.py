@@ -7,19 +7,19 @@ from functions import functions as f
 
 # TODO NOW why does it not print out??? is it a stream I have to catch???
 
-def main(saving, debugging):
-    f.print_if_debugging('started with main', debugging)
+def main(saving_to_csv, printing_steps):
+    f.print_steps('started with main', printing_steps)
 
     # t01 IMPORT
-    fm_exports: pd.DataFrame = t01.import_fm_exports(debugging)
-    f.print_if_debugging('t01: imported fm exports', debugging)
-    f.save_to_csv(fm_exports, 'intermed_results', f'O_exports_{data_input_version_id}', saving, debugging)
+    fm_exports: pd.DataFrame = t01.import_fm_exports(printing_steps)
+    f.print_steps('t01: imported fm exports', printing_steps)
+    f.save_to_csv(fm_exports, 'intermed_results', f'O_exports_{data_input_version_id}', saving_to_csv, printing_steps)
 
     # t02 SPLIT
-    cases, documents = t02.split(fm_exports, debugging)
-    f.print_if_debugging('t02: splitted cases and documents', debugging)
-    f.save_to_csv(cases, 'intermed_results', f'O_cases_{data_input_version_id}', False, debugging)
-    f.save_to_csv(documents, 'intermed_results', f'O_documents_{data_input_version_id}', False, debugging)
+    cases, documents = t02.split(fm_exports, printing_steps)
+    f.print_steps('t02: splitted cases and documents', printing_steps)
+    f.save_to_csv(cases, 'intermed_results', f'O_cases_{data_input_version_id}', False, printing_steps)
+    f.save_to_csv(documents, 'intermed_results', f'O_documents_{data_input_version_id}', False, printing_steps)
 
     # TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
@@ -66,12 +66,12 @@ def main(saving, debugging):
 
 if __name__ == "__main__":
     # global variables
-    saving = True
-    debugging = True
+    saving_to_csv = True
+    printing_steps = False
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
     data_version_id = 1
     random_seed: int = 1404
 
-    main(saving, debugging)
+    main(saving_to_csv, printing_steps)
