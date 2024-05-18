@@ -1,27 +1,32 @@
-import pandas as pd
+import time
 
 import t01_Import as t01
-import t02_Split as t02
+import t02_Exclude as t02
 from functions import functions as f
 
 
-# TODO NOW why does it not print out??? is it a stream I have to catch???
-
-def main(saving_to_csv, printing_steps):
+def main(saving_to_csv: bool, printing_steps: bool, random_seed: int, data_years: list[int]):
     f.print_steps('started with main', printing_steps)
 
-    # t01 IMPORT
-    fm_exports: pd.DataFrame = t01.import_fm_exports(printing_steps)
+    # %% t01 IMPORT
+    fm_doc_exports, fm_diaglist_exports = t01.import_fm_exports(data_years, printing_steps)
     f.print_steps('t01: imported fm exports', printing_steps)
-    f.save_to_csv(fm_exports, 'intermed_results', f'O_exports_{data_input_version_id}', saving_to_csv, printing_steps)
+    f.save_to_csv(fm_doc_exports, 'intermed_results', f'O_all_doc_exports_{data_input_version_id}', saving_to_csv,
+                  printing_steps)
 
-    # t02 SPLIT
-    cases, documents = t02.split(fm_exports, printing_steps)
-    f.print_steps('t02: splitted cases and documents', printing_steps)
-    f.save_to_csv(cases, 'intermed_results', f'O_cases_{data_input_version_id}', False, printing_steps)
-    f.save_to_csv(documents, 'intermed_results', f'O_documents_{data_input_version_id}', False, printing_steps)
+    # t02 %% EXCLUDE
+    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
+    f.print_steps('t02: excluded internally generated documents', printing_steps)
+    # TODO LATER save csv
+    # f.save_to_csv(documents, 'intermed_results', f'O_nogen_documents_{data_input_version_id}',
+    # saving_to_csv, printing_steps)
 
-    # TODO LATER add tests for steps
+    # %% TODO LATER t03 UNITE
+
+    # TODO LATER clean & preprocess diagnoses (docs are fine), see Melanie
+    # TODO LATER split into training and test data, see Melanie
+
+    # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
     #                                 , 'z-transformed (SimpleImputer)', 'one-hot'
     #                                 , 'No', m03.test_size, 'no test of normal distribution, no check of outliers')
@@ -31,7 +36,7 @@ def main(saving_to_csv, printing_steps):
     # tests.add_test_result('all rows are put into the modell'
     #                       , math.floor(len(m02.kids) * (1 - m03.test_size)) == len(m03.x_train))
 
-    # TODO LATER import modell steps
+    # %% TODO LATER import modell steps
     # import steps.m04_Mod_Poly_Reg as m04
     #
     # if not m04.m04_train_all:
@@ -65,13 +70,21 @@ def main(saving_to_csv, printing_steps):
 
 
 if __name__ == "__main__":
+
     # global variables
     saving_to_csv = True
-    printing_steps = False
+    printing_steps = True
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
     data_version_id = 1
     random_seed: int = 1404
+    current_year = int(time.strftime("%Y"))
+    data_years = [2013, current_year]
 
-    main(saving_to_csv, printing_steps)
+    # TODO replace with meta parameter table, see Melanie
+    f.print_steps(f'---\nDATA from the years {data_years[0]} - {data_years[1]} with \ndata input version '
+                  f'{data_input_version_id} and \ndata version {data_version_id} \nPREPROCESSING with \nrandom seed {random_seed} \n---',
+                  printing_steps)
+
+    main(saving_to_csv, printing_steps, random_seed, data_years)
