@@ -57,12 +57,21 @@ def import_documents(data_years, data_input_version_id, start_time, printing_ste
 
 def process_documents(fm_doc_exports: pd.DataFrame, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('process of documents', printing_steps)
-    # %% anonymize with TA id
-    fm_doc_exports.rename(columns={"ID_Fall": "id"})
-    # fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id) # TODO NOW generate random ID for each case
+
+    fm_doc_exports.rename(
+        columns={"ID_Fall": "id", 'fAnmeldedatum': 'year', 'filename': 'name', 'TextMBSVisionLength': 'length',
+                 'TextMBSVision': 'contents'}, inplace=True)
+    fm_doc_exports.drop(['ID_FM'], axis=1, inplace=True)  # dismiss child ID
+    fm_doc_exports['name'] = fm_doc_exports['name'].astype(str)
+    # TODO NOW does not work, column is of type object nevertheless
+    fm_doc_exports['contents'] = fm_doc_exports['contents'].astype(str)
+    # TODO NOW does not work, column is of type object nevertheless
+    fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 2), axis=1)
+
+    # %% anonymize with TA id # TODO NOW generate random ID for each case
+    # fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id)
     # fm_doc_exports.set_index('id', inplace=True)
 
-    # TODO NOW adapt columns to data and rename them
     return fm_doc_exports
 
 

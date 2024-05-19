@@ -2,8 +2,10 @@ import os
 import random
 import string
 import time
+from datetime import datetime
 
 import pandas as pd
+from pandas import isna
 
 
 def print_steps(object_to_be_printed: object, printing_steps: bool = False) -> None:
@@ -43,3 +45,16 @@ def get_running_time(start_time, digits: int) -> str:
         unit_text = 'minutes'
 
     return str(round(time_units, digits)) + ' ' + str(unit_text)
+
+
+def get_and_check_year_from_FM_date(row: pd.Series, date_format, column_nr: int) -> int:
+    fm_date = row.iloc[column_nr]
+    if isna(fm_date):
+        return 0
+    else:
+        string_date = str(fm_date)
+        string_date = string_date.replace(".", "/")  # verschiedene Formate präsent
+        date_int = int(datetime.strptime(string_date, date_format).year)
+        if date_int < 2013 or date_int > int(time.strftime("%Y")):
+            date_int = 0
+        return date_int
