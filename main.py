@@ -5,11 +5,13 @@ import t02_Exclude as t02
 from functions import functions as f
 
 
-def main(saving_to_csv: bool, printing_steps: bool, random_seed: int, data_years: list[int]):
+def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, random_seed: int,
+         data_years: list[int], start_time):
     f.print_steps('started with main', printing_steps)
 
     # %% t01 IMPORT
-    fm_doc_exports, fm_diaglist_exports = t01.import_fm_exports(data_years, printing_steps)
+    fm_doc_exports, fm_diaglist_exports = t01.import_fm_exports(data_years, data_input_version_id,
+                                                                start_time, printing_steps)
     f.print_steps('t01: imported fm exports', printing_steps)
     f.save_to_csv(fm_doc_exports, 'intermed_results', f'O_all_doc_exports_{data_input_version_id}', saving_to_csv,
                   printing_steps)
@@ -70,6 +72,7 @@ def main(saving_to_csv: bool, printing_steps: bool, random_seed: int, data_years
 
 
 if __name__ == "__main__":
+    start_time = time.time()
 
     # global variables
     saving_to_csv = True
@@ -87,4 +90,6 @@ if __name__ == "__main__":
                   f'{data_input_version_id} and \ndata version {data_version_id} \nPREPROCESSING with \nrandom seed {random_seed} \n---',
                   printing_steps)
 
-    main(saving_to_csv, printing_steps, random_seed, data_years)
+    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time)
+
+    print("--- %s seconds ---" % round((time.time() - start_time), 3))
