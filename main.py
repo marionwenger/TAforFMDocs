@@ -1,30 +1,49 @@
 import time
 
+import pandas as pd
+
 import t01_Import as t01
 import t02_Exclude as t02
 from functions import functions as f
 
 
 def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, random_seed: int,
-         data_years: list[int], start_time):
-    f.print_steps('started with main', printing_steps)
+         data_years: list[int], start_time, import_docs_anew):
+    f.print_steps('--- main ---', printing_steps)
 
-    # %% t01 IMPORT
-    fm_doc_exports, fm_diaglist_exports = t01.import_fm_exports(data_years, data_input_version_id,
-                                                                start_time, printing_steps)
-    f.print_steps('t01: imported fm exports', printing_steps)
-    f.save_to_csv(fm_doc_exports, 'intermed_results', f'O_all_doc_exports_{data_input_version_id}', saving_to_csv,
-                  printing_steps)
+    # DOCUMENTS
+    folder_name = 'intermed_results'
+    file_name = f'O_all_doc_exports_{data_input_version_id}'
 
-    # t02 %% EXCLUDE
-    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
-    f.print_steps('t02: excluded internally generated documents', printing_steps)
-    # TODO LATER save csv
+    f.print_steps('--- t01 ---', printing_steps)
+    if import_docs_anew:
+        # %% t01 IMPORT
+        fm_doc_exports = t01.import_documents(data_years, data_input_version_id, start_time, printing_steps)
+        f.print_steps('imported fm exports', printing_steps)
+        f.save_to_csv(fm_doc_exports, folder_name, file_name, saving_to_csv,
+                      printing_steps)
+    else:
+        # parsing already done
+        fm_doc_exports = f.read_from_csv(folder_name, file_name, printing_steps)
+        f.print_steps('used former import', printing_steps)
+
+    fm_doc_exports = t01.process_documents(fm_doc_exports, printing_steps)
+
+    # TODO import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
+    # DIAGNOSES LISTS
+    fm_diaglist_exports = pd.DataFrame()
+    fm_diaglist_exports = t01.import_diaglists(data_years, data_input_version_id, start_time, printing_steps)
+    fm_diaglist_exports = t01.process_diagllists(fm_diaglist_exports, printing_steps)
+    # TODO save csv
     # f.save_to_csv(documents, 'intermed_results', f'O_nogen_documents_{data_input_version_id}',
     # saving_to_csv, printing_steps)
 
-    # %% TODO LATER t03 UNITE
+    # t02 %% EXCLUDE # TODO NOW exclude internally generated documents like recommendations (after import of diaglist?)
+    f.print_steps('--- t02 ---', printing_steps)
+    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
+    f.print_steps('excluded internally generated documents', printing_steps)
 
+    # %% TODO LATER t03 UNITE
     # TODO LATER clean & preprocess diagnoses (docs are fine), see Melanie
     # TODO LATER split into training and test data, see Melanie
 
@@ -70,7 +89,6 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
     # filepath_data_versions = Path(f'meta_data/MI_data_versions_{data_versions.get_print_version()}.csv')
     # data_versions.df.to_csv(filepath_data_versions)
 
-
 if __name__ == "__main__":
     start_time = time.time()
 
@@ -85,11 +103,14 @@ if __name__ == "__main__":
     current_year = int(time.strftime("%Y"))
     data_years = [2013, current_year]
 
-    # TODO replace with meta parameter table, see Melanie
-    f.print_steps(f'---\nDATA from the years {data_years[0]} - {data_years[1]} with \ndata input version '
-                  f'{data_input_version_id} and \ndata version {data_version_id} \nPREPROCESSING with \nrandom seed {random_seed} \n---',
+    import_docs_anew = False  # False = parsing already done (it's time-consuming...)
+
+    # TODO LATER replace with meta parameter table, see Melanie
+    f.print_steps(f'--- DATA ---\ndata years {data_years[0]} - {data_years[1]} \ndata input version '
+                  f'{data_input_version_id} \ndata version {data_version_id} \nPROCESSING with \nrandom seed {random_seed}',
                   printing_steps)
 
-    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time)
+    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time, import_docs_anew)
 
-    print("--- %s seconds ---" % round((time.time() - start_time), 3))
+    print(f'--- {f.get_running_time(start_time, 3)} ---')
+    end_time = time.time()
