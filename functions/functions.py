@@ -27,7 +27,7 @@ def read_from_csv(folder_name: str, file_name: str, printing_steps: bool = False
     return pd.read_csv(file_path_csv)
 
 
-def generate_ta_id(input_seed: int) -> str:
+def generate_ta_id(row: pd.Series, input_seed: int) -> str:  # row is not needed, because it IS random...
     random.seed(input_seed)
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     return f'TA-{random_chars}'

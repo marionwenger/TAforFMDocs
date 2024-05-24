@@ -55,7 +55,7 @@ def import_documents(data_years, data_input_version_id, start_time, printing_ste
     return fm_doc_exports
 
 
-def process_documents(fm_doc_exports: pd.DataFrame, printing_steps: bool = False) -> pd.DataFrame:
+def process_documents(fm_doc_exports: pd.DataFrame, input_seed: int, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('process of documents', printing_steps)
 
     fm_doc_exports.rename(
@@ -70,9 +70,10 @@ def process_documents(fm_doc_exports: pd.DataFrame, printing_steps: bool = False
     # Values in rows are strings nevertheless!
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 2), axis=1)
 
-    # %% anonymize with TA id # TODO NOW (II) generate random ID for each case
-    # fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id)
-    # fm_doc_exports.set_index('id', inplace=True)
+    # %% anonymize with TA id
+    fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id, input_seed=input_seed)
+    # TODO NOW (II) why is the ta id Nan although the string is created perfectly?
+    fm_doc_exports.set_index('id', inplace=True)
 
     return fm_doc_exports
 

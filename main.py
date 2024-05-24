@@ -7,7 +7,7 @@ import t02_Exclude as t02
 from functions import functions as f
 
 
-def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, random_seed: int,
+def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, input_seed: int,
          data_years: list[int], start_time, import_docs_anew):
     f.print_steps('--- main ---', printing_steps)
 
@@ -27,7 +27,7 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         fm_doc_exports = f.read_from_csv(folder_name, file_name, printing_steps)
         f.print_steps('used former import', printing_steps)
 
-    fm_doc_exports = t01.process_documents(fm_doc_exports, printing_steps)
+    fm_doc_exports = t01.process_documents(fm_doc_exports, input_seed, printing_steps)
 
     # TODO NEXT (IV) import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
     # DIAGNOSES LISTS
