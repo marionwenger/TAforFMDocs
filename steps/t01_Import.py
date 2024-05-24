@@ -62,13 +62,15 @@ def process_documents(fm_doc_exports: pd.DataFrame, printing_steps: bool = False
         columns={"ID_Fall": "id", 'fAnmeldedatum': 'year', 'filename': 'name', 'TextMBSVisionLength': 'length',
                  'TextMBSVision': 'contents'}, inplace=True)
     fm_doc_exports.drop(['ID_FM'], axis=1, inplace=True)  # dismiss child ID
+
     fm_doc_exports['name'] = fm_doc_exports['name'].astype(str)
-    # TODO NOW does not work, column is of type object nevertheless
     fm_doc_exports['contents'] = fm_doc_exports['contents'].astype(str)
-    # TODO NOW does not work, column is of type object nevertheless
+    # The object dtype is how pandas stores strings in dataframes. If for some particular reason you absolutely can't
+    # have that data as an object dtype, you're going to have to save it to something other than a dataframe.
+    # Values in rows are strings nevertheless!
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 2), axis=1)
 
-    # %% anonymize with TA id # TODO NOW generate random ID for each case
+    # %% anonymize with TA id # TODO NOW (II) generate random ID for each case
     # fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id)
     # fm_doc_exports.set_index('id', inplace=True)
 
@@ -77,7 +79,7 @@ def process_documents(fm_doc_exports: pd.DataFrame, printing_steps: bool = False
 
 def import_diaglists(data_years, data_input_version_id, start_time, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('import of diagnoses lists', printing_steps)
-    # %% TODO import diagnoses lists (see also R code for Vergleich...)
+    # %% TODO NEXT (IV) import diagnoses lists (see also R code for Vergleich...)
     fm_diaglist_exports = pd.DataFrame()
     return fm_diaglist_exports
 
@@ -89,5 +91,5 @@ def process_diagllists(fm_diaglist_exports: pd.DataFrame, printing_steps: bool =
     # fm_diaglist_exports['id'] = fm_diaglist_exports.apply(f.generate_ta_id) # TODO generate random ID for each case
     # fm_diaglist_exports.set_index('id', inplace=True)
 
-    # TODO adapt columns to data and rename them
+    # TODO NEXT (IV) adapt columns to data and rename them
     return fm_diaglist_exports

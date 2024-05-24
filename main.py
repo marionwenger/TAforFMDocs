@@ -29,7 +29,7 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
 
     fm_doc_exports = t01.process_documents(fm_doc_exports, printing_steps)
 
-    # TODO import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
+    # TODO NEXT (IV) import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
     # DIAGNOSES LISTS
     fm_diaglist_exports = pd.DataFrame()
     fm_diaglist_exports = t01.import_diaglists(data_years, data_input_version_id, start_time, printing_steps)
@@ -38,7 +38,7 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
     # f.save_to_csv(documents, 'intermed_results', f'O_nogen_documents_{data_input_version_id}',
     # saving_to_csv, printing_steps)
 
-    # t02 %% EXCLUDE # TODO NOW exclude internally generated documents like recommendations (after import of diaglist?)
+    # t02 %% EXCLUDE # TODO NOW (III) exclude internally generated documents like recommendations (after import of diaglist?)
     f.print_steps('--- t02 ---', printing_steps)
     documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
     f.print_steps('excluded internally generated documents', printing_steps)
@@ -107,7 +107,8 @@ if __name__ == "__main__":
 
     # TODO LATER replace with meta parameter table, see Melanie
     f.print_steps(f'--- DATA ---\ndata years {data_years[0]} - {data_years[1]} \ndata input version '
-                  f'{data_input_version_id} \ndata version {data_version_id} \nPROCESSING with \nrandom seed {random_seed}',
+                  f'{data_input_version_id} \ndata version {data_version_id} \nPROCESSING with \nrandom seed {random_seed} '
+                  f'\nimport_docs_anew = {import_docs_anew} \nsaving_to_csv = {saving_to_csv}',
                   printing_steps)
 
     main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time, import_docs_anew)
