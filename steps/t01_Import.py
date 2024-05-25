@@ -71,8 +71,8 @@ def process_documents(fm_doc_exports: pd.DataFrame, input_seed: int, printing_st
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 2), axis=1)
 
     # %% anonymize with TA id
-    fm_doc_exports['id'] = fm_doc_exports.apply(f.generate_ta_id, input_seed=input_seed)
-    # TODO NOW (II) why is the ta id Nan although the string is created perfectly?
+    fm_doc_exports['id'] = fm_doc_exports.id.apply(f.generate_ta_id)  # id is the random seed for each row
+    fm_doc_exports = fm_doc_exports.sample(frac=1, ignore_index=True, random_state=input_seed)
     fm_doc_exports.set_index('id', inplace=True)
 
     return fm_doc_exports
