@@ -15,7 +15,7 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
     folder_name = 'intermed_results'
     file_name = f'O_all_doc_exports_{data_input_version_id}'
 
-    f.print_steps('--- t01 ---', printing_steps)
+    f.print_steps('--- t01 IMPORT ---', printing_steps)
     if import_docs_anew:
         # %% t01 IMPORT
         fm_doc_exports = t01.import_documents(data_years, data_input_version_id, start_time, printing_steps)
@@ -28,6 +28,12 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         f.print_steps('used former import', printing_steps)
 
     fm_doc_exports = t01.process_documents(fm_doc_exports, input_seed, printing_steps)
+    f.print_steps('processed documents', printing_steps)
+
+    # t02 %% EXCLUDE
+    f.print_steps('--- t02 EXCLUDE ---', printing_steps)
+    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
+    f.print_steps('excluded internally generated documents', printing_steps)
 
     # TODO NEXT (IV) import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
     # DIAGNOSES LISTS
@@ -37,11 +43,6 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
     # TODO save csv
     # f.save_to_csv(documents, 'intermed_results', f'O_nogen_documents_{data_input_version_id}',
     # saving_to_csv, printing_steps)
-
-    # t02 %% EXCLUDE # TODO NOW (III) exclude internally generated documents like recommendations (after import of diaglist?)
-    f.print_steps('--- t02 ---', printing_steps)
-    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
-    f.print_steps('excluded internally generated documents', printing_steps)
 
     # %% TODO LATER t03 UNITE
     # TODO LATER clean & preprocess diagnoses (docs are fine), see Melanie
