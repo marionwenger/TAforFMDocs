@@ -9,43 +9,42 @@ from functions import functions as f
 
 def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, input_seed: int,
          data_years: list[int], start_time, import_docs_anew):
-    f.print_steps('--- main ---', printing_steps)
+    f.print_steps('--- MAIN ---', printing_steps)
 
     # DOCUMENTS
     folder_name = 'intermed_results'
-    file_name = f'O_all_doc_exports_{data_input_version_id}'
+    file_doc_name = f'O_all_doc_exports_{data_input_version_id}'
+    file_diag_name = f'O_all_diag_exports_{data_input_version_id}'
 
-    f.print_steps('--- t01 IMPORT ---', printing_steps)
+    f.print_steps('--- t01 IMPORT DOCUMENTS ---', printing_steps)
     if import_docs_anew:
         # %% t01 IMPORT
         fm_doc_exports = t01.import_documents(data_years, data_input_version_id, start_time, printing_steps)
         f.print_steps('imported fm exports', printing_steps)
-        f.save_to_csv(fm_doc_exports, folder_name, file_name, saving_to_csv,
+        f.save_to_csv(fm_doc_exports, folder_name, file_doc_name, saving_to_csv,
                       printing_steps)
     else:
         # parsing already done
-        fm_doc_exports = f.read_from_csv(folder_name, file_name, printing_steps)
+        fm_doc_exports = f.read_from_csv(folder_name, file_doc_name, printing_steps)
         f.print_steps('used former import', printing_steps)
 
     fm_doc_exports = t01.process_documents(fm_doc_exports, input_seed, printing_steps)
     f.print_steps('processed documents', printing_steps)
 
-    # t02 %% EXCLUDE
+    # t02 %% EXCLUDE recommendations
     f.print_steps('--- t02 EXCLUDE ---', printing_steps)
     documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
     f.print_steps('excluded internally generated documents', printing_steps)
 
-    # TODO NEXT (IV) import & process diaglist (after exclusion of recommendations, that is more interesting for ZHAW...)
     # DIAGNOSES LISTS
+    f.print_steps('--- t01 IMPORT DIAGLISTS ---', printing_steps)
     fm_diaglist_exports = pd.DataFrame()
     fm_diaglist_exports = t01.import_diaglists(data_years, data_input_version_id, start_time, printing_steps)
-    fm_diaglist_exports = t01.process_diagllists(fm_diaglist_exports, printing_steps)
-    # TODO save csv
-    # f.save_to_csv(documents, 'intermed_results', f'O_nogen_documents_{data_input_version_id}',
-    # saving_to_csv, printing_steps)
+    fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, printing_steps)
+    f.print_steps('processed diag lists', printing_steps)
+    f.save_to_csv(fm_diaglist_exports, folder_name, file_diag_name, saving_to_csv, printing_steps)
 
-    # %% TODO LATER t03 UNITE
-    # TODO LATER clean & preprocess diagnoses (docs are fine), see Melanie
+    # %% TODO NEXT t03 MODELL --> join all documents of same case to text... (1! text per case)
     # TODO LATER split into training and test data, see Melanie
 
     # %% TODO LATER add tests for steps
@@ -95,7 +94,7 @@ if __name__ == "__main__":
 
     # global variables
     saving_to_csv = True
-    printing_steps = True
+    printing_steps = False
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'

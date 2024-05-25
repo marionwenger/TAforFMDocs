@@ -23,15 +23,13 @@ def import_documents(data_years, data_input_version_id, start_time, printing_ste
 
     # export_columns = ['ID_FM', 'fName_Vorname_Kind', 'ID_Fall', 'fAnmeldedatum', 'filename', 'TextMBSVisionLength',
     #                   'TextMBSVision']  # Version kleines Test File
-    export_columns = ['ID_FM', 'ID_Fall', 'fAnmeldedatum', 'filename', 'TextMBSVisionLength', 'TextMBSVision']
-    fm_doc_exports = pd.DataFrame(columns=export_columns)
+    export_doc_columns = ['ID_FM', 'ID_Fall', 'fAnmeldedatum', 'filename', 'TextMBSVisionLength', 'TextMBSVision']
+    fm_doc_exports = pd.DataFrame(columns=export_doc_columns)
 
     with open(file_path_data, "r", encoding='utf-8') as file:  # did not work: 'iso-8859-1'      ?'latin-1'
         f.print_steps('with opened', printing_steps)
         soup = BeautifulSoup(file, "lxml")  # 'html.parser' is too slow
         f.print_steps('soup cooked', printing_steps)
-
-    # TODO IF NEEDED restrict data to given years (data_years)
 
     f.print_steps('with closed', printing_steps)
     rows = soup.find_all("tr")
@@ -80,17 +78,75 @@ def process_documents(fm_doc_exports: pd.DataFrame, input_seed: int, printing_st
 
 def import_diaglists(data_years, data_input_version_id, start_time, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('import of diagnoses lists', printing_steps)
-    # %% TODO NEXT (IV) import diagnoses lists (see also R code for Vergleich...)
-    fm_diaglist_exports = pd.DataFrame()
+
+    file_path_data = Path(f'data/I_diaglist_exports_{data_input_version_id}.htm')
+    f.print_steps('filepath is ' + str(file_path_data), printing_steps)
+
+    with open(file_path_data, "r", encoding='utf-8') as file:
+        f.print_steps('with opened', printing_steps)
+        soup = BeautifulSoup(file, "html.parser")  # lxml?
+        f.print_steps('soup cooked', printing_steps)
+
+    f.print_steps('with closed', printing_steps)
+
+    # Parse the HTML content using BeautifulSoup
+    table = soup.find('table')
+
+    # Extract headers
+    headers = [th.get_text() for th in table.find_all('th')]
+
+    # Extract rows
+    rows = []
+    for tr in table.find_all('tr')[1:]:  # tr = table row
+        row = []
+        for td in tr.find_all('td'):  # td = table data = value in one column
+            # Split the cell content on <br> tags
+            cell_content = str(td).split(';')  # values between semicolons only in the last column
+            # Strip any HTML tags and whitespace from each value
+            cell_content = [BeautifulSoup(val, 'html.parser').get_text(strip=True) for val in cell_content]
+            # TODO NOW (I) encode utf-8
+            while "" in cell_content:
+                cell_content.remove("")
+            row = row + cell_content
+        rows.append(row)
+
+    # Find the maximum length of rows which varies because of the concatenated values
+    max_columns = max(len(row) for row in rows)
+
+    # Create column names for the split values in the last column
+    new_headers = headers[:len(headers) - 1] + [f"diag_{i}" for i in range(1, (max_columns - (len(headers) - 1)) + 1)]
+
+    # Flatten the rows to match the new headers
+    flattened_rows = []
+    counter = 0
+    for row in rows:
+        counter = counter + 1
+        new_row = row
+        extension: list = ['' for i in range(max_columns - len(row))]
+        new_row.extend(extension)  # Extend the row to match the max length
+        flattened_rows.append(new_row)
+        if counter % 3000 == 0:
+            f.print_steps(f'{counter} rows imported in {f.get_running_time(start_time, 3)}'
+                          , printing_steps)
+
+    # Create DataFrame
+    fm_diaglist_exports = pd.DataFrame(flattened_rows, columns=new_headers)
+
     return fm_diaglist_exports
 
 
-def process_diagllists(fm_diaglist_exports: pd.DataFrame, printing_steps: bool = False) -> pd.DataFrame:
+def process_diaglists(fm_diaglist_exports: pd.DataFrame, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('process of diagnoses lists', printing_steps)
-    # %% anonymize with TA id
+
+    fm_diaglist_exports.rename(
+        columns={"ID_Fall": "id", 'fDiagnosen': 'diag_list'}, inplace=True)
+    fm_diaglist_exports.drop(['Datum'], axis=1, inplace=True)
+
+    # TODO NOW (II) anonymize with TA id - same ID as docs...
     # fm_diaglist_exports.rename(columns={"ID_Fall": "id"})
-    # fm_diaglist_exports['id'] = fm_diaglist_exports.apply(f.generate_ta_id) # TODO generate random ID for each case
+    # fm_diaglist_exports['id'] = fm_diaglist_exports.apply(f.generate_ta_id)
     # fm_diaglist_exports.set_index('id', inplace=True)
 
-    # TODO NEXT (IV) adapt columns to data and rename them
+    # TODO NOW (III) classify diagnoses & 1-hot encoding (see also R code for Vergleich...)
+
     return fm_diaglist_exports
