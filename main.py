@@ -8,44 +8,51 @@ from functions import functions as f
 
 
 def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, input_seed: int,
-         data_years: list[int], start_time, import_docs_anew):
+         data_years: list[int], start_time, digits: int, import_docs_anew: bool, import_diaglists_anew: bool):
     f.print_steps('--- MAIN ---', printing_steps)
 
     # DOCUMENTS
     folder_name = 'intermed_results'
     file_doc_name = f'O_all_doc_exports_{data_input_version_id}'
-    file_diag_name = f'O_all_diag_exports_{data_input_version_id}'
+    file_diaglist_name = f'O_all_diaglist_exports_{data_input_version_id}'
 
-    f.print_steps('--- t01 IMPORT DOCUMENTS ---', printing_steps)
+    f.print_steps('--- t01 IMPORT & PROCESS DOCUMENTS ---', printing_steps)
     if import_docs_anew:
         # %% t01 IMPORT
-        fm_doc_exports = t01.import_documents(data_years, data_input_version_id, start_time, printing_steps)
+        fm_doc_exports = t01.import_documents(data_input_version_id, start_time, digits, printing_steps)
         f.print_steps('imported fm exports', printing_steps)
-        f.save_to_csv(fm_doc_exports, folder_name, file_doc_name, saving_to_csv,
+        f.save_to_csv(fm_doc_exports, folder_name, file_doc_name, False, saving_to_csv,
                       printing_steps)
     else:
         # parsing already done
         fm_doc_exports = f.read_from_csv(folder_name, file_doc_name, printing_steps)
-        f.print_steps('used former import', printing_steps)
+        f.print_steps('used former documents import', printing_steps)
 
     fm_doc_exports = t01.process_documents(fm_doc_exports, input_seed, printing_steps)
     f.print_steps('processed documents', printing_steps)
 
     # t02 %% EXCLUDE recommendations
-    f.print_steps('--- t02 EXCLUDE ---', printing_steps)
-    documents = t02.exclude(fm_doc_exports, random_seed, printing_steps)
+    f.print_steps('--- t02 EXCLUDE DOCUMENTS---', printing_steps)
+    documents = t02.exclude(fm_doc_exports, printing_steps)
     f.print_steps('excluded internally generated documents', printing_steps)
 
     # DIAGNOSES LISTS
-    f.print_steps('--- t01 IMPORT DIAGLISTS ---', printing_steps)
-    fm_diaglist_exports = pd.DataFrame()
-    fm_diaglist_exports = t01.import_diaglists(data_years, data_input_version_id, start_time, printing_steps)
-    fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, printing_steps)
-    f.print_steps('processed diag lists', printing_steps)
-    f.save_to_csv(fm_diaglist_exports, folder_name, file_diag_name, saving_to_csv, printing_steps)
+    f.print_steps('--- t01 IMPORT & PROCESS DIAGLISTS ---', printing_steps)
+    if import_diaglists_anew:
+        # %% t01 IMPORT
+        fm_diaglist_exports: pd.DataFrame = t01.import_diaglists(data_input_version_id, start_time, digits,
+                                                                 printing_steps)
+        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, input_seed, printing_steps)
+        f.print_steps('processed diag lists', printing_steps)
+        f.save_to_csv(fm_diaglist_exports, folder_name, file_diaglist_name, True, saving_to_csv,
+                      printing_steps)
+    else:
+        # parsing already done
+        fm_diaglist_exports = f.read_from_csv(folder_name, file_diaglist_name, printing_steps)
+        f.print_steps('used former diaglist import', printing_steps)
 
-    # %% TODO NEXT t03 MODELL --> join all documents of same case to text... (1! text per case)
-    # TODO LATER split into training and test data, see Melanie
+    # %% TODO NOW t03 MODELL --> join all documents of same case to text... (1! text per case)
+    # TODO NEXT split into training and test data, see Melanie
 
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
@@ -89,8 +96,11 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
     # filepath_data_versions = Path(f'meta_data/MI_data_versions_{data_versions.get_print_version()}.csv')
     # data_versions.df.to_csv(filepath_data_versions)
 
+
 if __name__ == "__main__":
     start_time = time.time()
+    digits = 3
+    print(f'--- START TIME = {f.print_time(start_time, digits)} ---')
 
     # global variables
     saving_to_csv = True
@@ -99,19 +109,29 @@ if __name__ == "__main__":
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
     data_version_id = 1
+
     random_seed: int = 1404
     current_year = int(time.strftime("%Y"))
     data_years = [2013, current_year]
 
-    import_docs_anew = False  # False = parsing already done (it's time-consuming...)
+    # False = parsing already done (it's time-consuming...)
+    import_docs_anew = False  # import takes about 3 minutes
+    import_diaglists_anew = False  # import takes about half a minute
 
     # TODO LATER replace with meta parameter table, see Melanie
-    f.print_steps(f'--- DATA ---\ndata years {data_years[0]} - {data_years[1]} \ndata input version '
-                  f'{data_input_version_id} \ndata version {data_version_id} \nPROCESSING with \nrandom seed {random_seed} '
-                  f'\nimport_docs_anew = {import_docs_anew} \nsaving_to_csv = {saving_to_csv}',
+    f.print_steps(f'--- data variables ---'
+                  f'\ndata_years = {data_years[0]} - {data_years[1]} '
+                  f'\ndata_input_version_id = {data_input_version_id} '
+                  f'\ndata_version_id = {data_version_id} '
+                  f'\n--- process variables --- '
+                  f'\nrandom_seed = {random_seed} '
+                  f'\nimport_docs_anew = {import_docs_anew} '
+                  f'\nimport_diaglists_anew = {import_diaglists_anew}'
+                  f'\nsaving_to_csv = {saving_to_csv}',
                   printing_steps)
 
-    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time, import_docs_anew)
+    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time, digits,
+         import_docs_anew, import_diaglists_anew)
 
-    print(f'--- {f.get_running_time(start_time, 3)} ---')
-    end_time = time.time()
+    print(f'--- END TIME = {f.print_time(time.time(), digits)} ---')
+    print(f'--- RUNNING TIME = {f.get_running_time(start_time, digits)} ---')

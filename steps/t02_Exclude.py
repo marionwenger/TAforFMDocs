@@ -9,7 +9,7 @@ forbidden_texts = ['Höchstzahl Stunden:', 'Gültigkeit und Dauer:', 'Form der D
                    'Art der Leistung:']
 
 
-def exclude(fm_doc_exports: pd.DataFrame, input_seed: int, printing_steps: bool = False) -> pd.DataFrame:
+def exclude(fm_doc_exports: pd.DataFrame, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('exclusion of documents', printing_steps)
 
     # Create a single regular expression pattern from the forbidden text snippets

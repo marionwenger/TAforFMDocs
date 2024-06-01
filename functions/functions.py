@@ -13,11 +13,11 @@ def print_steps(object_to_be_printed: object, printing_steps: bool = False) -> N
         print(object_to_be_printed)
 
 
-def save_to_csv(data: pd.DataFrame, folder_name: str, file_name: str, saving_to_csv: bool = True,
+def save_to_csv(data: pd.DataFrame, folder_name: str, file_name: str, saving_index: bool, saving_to_csv: bool = True,
                 printing_steps: bool = False) -> None:
     if saving_to_csv:
         file_path_csv = os.path.join(folder_name, f'{file_name}.csv')
-        data.to_csv(file_path_csv)
+        data.to_csv(file_path_csv, index=saving_index)
         print_steps('saved ' + file_path_csv, printing_steps)
 
 
@@ -34,22 +34,12 @@ def generate_ta_id(input_seed: int) -> str:  # row is not needed, because it IS 
 
 
 def get_running_time(start_time, digits: int) -> str:
-    running_time = time.time() - start_time
-    time_units = running_time
-    unit_text = 'seconds'
-    if running_time >= 3600:
-        time_units = time_units / 3600
-        unit_text = 'hours'
-    elif running_time >= 60:
-        time_units = time_units / 60
-        unit_text = 'minutes'
-
-    return str(round(time_units, digits)) + ' ' + str(unit_text)
+    return print_time(time.time() - start_time, digits)
 
 
 def get_and_check_year_from_FM_date(row: pd.Series, date_format, column_nr: int) -> int:
     fm_date = row.iloc[column_nr]
-    if isna(fm_date):
+    if not fm_date or isna(fm_date):
         return 0
     else:
         string_date = str(fm_date)
@@ -58,3 +48,31 @@ def get_and_check_year_from_FM_date(row: pd.Series, date_format, column_nr: int)
         if date_int < 2013 or date_int > int(time.strftime("%Y")):
             date_int = 0
         return date_int
+
+
+# TODO LATER include check if there is a column called 'id'...(or include code step renaming given column to 'id')
+def anonymize_and_index(df: pd.DataFrame, random_seed: int) -> pd.DataFrame:
+    df['id'] = df.id.apply(generate_ta_id)  # id is the random seed for each row
+    df = df.sample(frac=1, ignore_index=True, random_state=random_seed)
+    df.set_index('id', inplace=True)
+    return df
+
+
+def print_time(time_units, digits: int) -> str:
+    unit_text = 'second(s)'
+    if time_units >= 86400:  # > day --> substract all days...
+        time_this_day = time_units % 86400
+        return print_time_this_day(time_this_day, digits)
+    elif time_units >= 3600:
+        time_units = time_units / 3600
+        unit_text = 'hour(s)'
+    elif time_units >= 60:
+        time_units = time_units / 60
+        unit_text = 'minute(s)'
+
+    return str(round(time_units, digits)) + ' ' + str(unit_text)
+
+
+def print_time_this_day(time_units, digits: int) -> str:
+    two_hours = 7200  # other time zone
+    return print_time(time_units + two_hours, digits) + ' since the beginning of today'
