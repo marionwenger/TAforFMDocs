@@ -76,3 +76,9 @@ def print_time(time_units, digits: int) -> str:
 def print_time_this_day(time_units, digits: int) -> str:
     two_hours = 7200  # other time zone
     return print_time(time_units + two_hours, digits) + ' since the beginning of today'
+
+
+def prepare_contents_for_concatenation(row: pd.Series) -> str:
+    name = row.iloc[1]
+    contents = row.iloc[3]
+    return name + ' ' + contents + ' '

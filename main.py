@@ -4,6 +4,7 @@ import pandas as pd
 
 import t01_Import as t01
 import t02_Exclude as t02
+import t03_Unite as t03
 from functions import functions as f
 
 
@@ -51,7 +52,11 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         fm_diaglist_exports = f.read_from_csv(folder_name, file_diaglist_name, printing_steps)
         f.print_steps('used former diaglist import', printing_steps)
 
-    # %% TODO NOW t03 MODELL --> join all documents of same case to text... (1! text per case)
+    # %% t03 UNITE
+    f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
+    texts_per_case = t03.unite_texts_per_case(documents, printing_steps)
+    f.print_steps('united texts per case', printing_steps)
+
     # TODO NEXT split into training and test data, see Melanie
 
     # %% TODO LATER add tests for steps
