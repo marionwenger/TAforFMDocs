@@ -1,4 +1,5 @@
 import time
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -55,7 +56,7 @@ def import_documents(data_input_version_id, start_time, digits: int,
     return fm_doc_exports
 
 
-def process_documents(fm_doc_exports: pd.DataFrame, input_seed: int, printing_steps: bool = False) -> pd.DataFrame:
+def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_steps: bool = False) -> pd.DataFrame:
     f.print_steps('process of documents', printing_steps)
 
     fm_doc_exports.rename(
@@ -63,7 +64,7 @@ def process_documents(fm_doc_exports: pd.DataFrame, input_seed: int, printing_st
                  'TextMBSVision': 'contents'}, inplace=True)
 
     # id --> type string
-    fm_doc_exports = f.anonymize_and_index(fm_doc_exports, input_seed)
+    fm_doc_exports = f.anonymize_and_index(fm_doc_exports, random_seed)
     # year (second column) --> type int
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 0), axis=1)
     fm_doc_exports['name'] = fm_doc_exports['name'].astype(str)
@@ -143,6 +144,17 @@ def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int,
     fm_diaglist_exports.rename(
         columns={"ID_Fall": "id", 'fDiagnosen': 'diag_list'}, inplace=True)
     fm_diaglist_exports.drop(['Datum'], axis=1, inplace=True)
+
+    fm_diaglist_exports['id'] = fm_diaglist_exports['id'].apply(f.convert_to_int)
+    fm_diaglist_exports = fm_diaglist_exports.loc[fm_diaglist_exports['id'] != 0]
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore")
+        # SettingWithCopyWarning:
+        # A value is trying to be set on a copy of a slice from a DataFrame.
+        # Try using .loc[row_indexer,col_indexer] = value instead"
+        for i in range(1, fm_diaglist_exports.shape[1] - 1):
+            fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
+
     fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed)
 
     # TODO NOW classify diagnoses & 1-hot encoding (see also R code for Vergleich...)

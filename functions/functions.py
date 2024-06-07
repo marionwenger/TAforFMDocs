@@ -2,6 +2,7 @@ import os
 import random
 import string
 import time
+import warnings
 from datetime import datetime
 
 import pandas as pd
@@ -27,9 +28,16 @@ def read_from_csv(folder_name: str, file_name: str, printing_steps: bool = False
     return pd.read_csv(file_path_csv)
 
 
-def generate_ta_id(input_seed: int) -> str:  # row is not needed, because it IS random...
-    random.seed(input_seed)
+def generate_ta_id(id: int) -> str:
+    if id == 0:
+        return ''
+    elif isna(id):
+        raise Exception(f"generate_ta_id: id isna")
+    random.seed(id)  # 'id' is the random seed for each row
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    # test #
+    if id == 22225:  # ta id = TA-MZZ3EI
+        print(f'generate_ta_id: id = {id}, ta_id = TA-{random_chars}')
     return f'TA-{random_chars}'
 
 
@@ -52,8 +60,13 @@ def get_and_check_year_from_FM_date(row: pd.Series, date_format, column_nr: int)
 
 # TODO LATER include check if there is a column called 'id'...(or include code step renaming given column to 'id')
 def anonymize_and_index(df: pd.DataFrame, random_seed: int) -> pd.DataFrame:
-    df['id'] = df.id.apply(generate_ta_id)  # id is the random seed for each row
-    df = df.sample(frac=1, ignore_index=True, random_state=random_seed)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore")
+        # SettingWithCopyWarning:
+        # A value is trying to be set on a copy of a slice from a DataFrame.
+        # Try using .loc[row_indexer,col_indexer] = value instead"
+        df['id'] = df.id.apply(generate_ta_id)  # id is the random seed for each row
+    df = df.sample(frac=1, ignore_index=True, random_state=random_seed)  # random seed is only used for reordering
     df.set_index('id', inplace=True)
     return df
 
@@ -82,3 +95,12 @@ def prepare_contents_for_concatenation(row: pd.Series) -> str:
     name = row.iloc[1]
     contents = row.iloc[3]
     return name + ' ' + contents + ' '
+
+
+def convert_to_int(value) -> int:
+    try:
+        # Try to convert to integer
+        return int(value)
+    except ValueError:
+        # If conversion fails, return:
+        return 0

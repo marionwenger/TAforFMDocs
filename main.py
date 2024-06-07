@@ -8,7 +8,7 @@ import t03_Unite as t03
 from functions import functions as f
 
 
-def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, input_seed: int,
+def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, random_seed: int,
          data_years: list[int], start_time, digits: int, import_docs_anew: bool, import_diaglists_anew: bool):
     f.print_steps('--- MAIN ---', printing_steps)
 
@@ -29,7 +29,7 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         fm_doc_exports = f.read_from_csv(folder_name, file_doc_name, printing_steps)
         f.print_steps('used former documents import', printing_steps)
 
-    fm_doc_exports = t01.process_documents(fm_doc_exports, input_seed, printing_steps)
+    fm_doc_exports = t01.process_documents(fm_doc_exports, random_seed, printing_steps)
     f.print_steps('processed documents', printing_steps)
 
     # t02 %% EXCLUDE recommendations
@@ -43,13 +43,16 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         # %% t01 IMPORT
         fm_diaglist_exports: pd.DataFrame = t01.import_diaglists(data_input_version_id, start_time, digits,
                                                                  printing_steps)
-        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, input_seed, printing_steps)
+        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, random_seed, printing_steps)
         f.print_steps('processed diag lists', printing_steps)
         f.save_to_csv(fm_diaglist_exports, folder_name, file_diaglist_name, True, saving_to_csv,
                       printing_steps)
-    else:
+    else:  # TODO LATER rearrange code with methods so there are less duplicated statements
         # parsing already done
         fm_diaglist_exports = f.read_from_csv(folder_name, file_diaglist_name, printing_steps)
+        fm_diaglist_exports['id'] = fm_diaglist_exports['id'].astype(str)
+        for i in range(1, fm_diaglist_exports.shape[1] - 1):
+            fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
         f.print_steps('used former diaglist import', printing_steps)
 
     # %% t03 UNITE
@@ -109,7 +112,7 @@ if __name__ == "__main__":
 
     # global variables
     saving_to_csv = True
-    printing_steps = False
+    printing_steps = True
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
@@ -120,8 +123,8 @@ if __name__ == "__main__":
     data_years = [2013, current_year]
 
     # False = parsing already done (it's time-consuming...)
-    import_docs_anew = False  # import takes about 3 minutes
-    import_diaglists_anew = False  # import takes about half a minute
+    import_docs_anew = True  # import takes about 3 minutes
+    import_diaglists_anew = True  # import takes about half a minute
 
     # TODO LATER replace with meta parameter table, see Melanie
     f.print_steps(f'--- data variables ---'
