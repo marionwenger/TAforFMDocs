@@ -8,8 +8,7 @@ import t03_Unite as t03
 from functions import functions as f
 
 
-def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, random_seed: int,
-         data_years: list[int], start_time, digits: int, import_docs_anew: bool, import_diaglists_anew: bool):
+def main():
     f.print_steps('--- MAIN ---', printing_steps)
 
     # DOCUMENTS
@@ -29,7 +28,8 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         fm_doc_exports = f.read_from_csv(folder_name, file_doc_name, printing_steps)
         f.print_steps('used former documents import', printing_steps)
 
-    fm_doc_exports = t01.process_documents(fm_doc_exports, random_seed, printing_steps)
+    fm_doc_exports = t01.process_documents(fm_doc_exports, random_seed, printing_steps,
+                                           test_on, test_case_ids)
     f.print_steps('processed documents', printing_steps)
 
     # t02 %% EXCLUDE recommendations
@@ -43,7 +43,8 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
         # %% t01 IMPORT
         fm_diaglist_exports: pd.DataFrame = t01.import_diaglists(data_input_version_id, start_time, digits,
                                                                  printing_steps)
-        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, random_seed, printing_steps)
+        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, random_seed, printing_steps,
+                                                    test_on, test_case_ids)
         f.print_steps('processed diag lists', printing_steps)
         f.save_to_csv(fm_diaglist_exports, folder_name, file_diaglist_name, True, saving_to_csv,
                       printing_steps)
@@ -55,9 +56,14 @@ def main(saving_to_csv: bool, printing_steps: bool, data_input_version_id: str, 
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
         f.print_steps('used former diaglist import', printing_steps)
 
+    # TODO NOW 2 073 Listen von vorher 21 539 Listen - das sind viel zu wenige!!|
+    # TODO NOW ist das der Grund dass ich fast keine Fall mit Dokumenten UND Diagliste finde???
+
     # %% t03 UNITE
     f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
-    texts_per_case = t03.unite_texts_per_case(documents, printing_steps)
+    texts_per_case = t03.unite_texts_per_case(documents, printing_steps, random_seed, test_on, test_case_ids)
+    file_texts_name = f'O_all_texts_exports_{data_input_version_id}'
+    f.save_to_csv(texts_per_case, folder_name, file_texts_name, True, saving_to_csv, printing_steps)
     f.print_steps('united texts per case', printing_steps)
 
     # TODO NEXT split into training and test data, see Melanie
@@ -110,9 +116,8 @@ if __name__ == "__main__":
     digits = 3
     print(f'--- START TIME = {f.print_time(start_time, digits)} ---')
 
-    # global variables
     saving_to_csv = True
-    printing_steps = True
+    printing_steps = False
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
@@ -123,8 +128,15 @@ if __name__ == "__main__":
     data_years = [2013, current_year]
 
     # False = parsing already done (it's time-consuming...)
-    import_docs_anew = True  # import takes about 3 minutes
-    import_diaglists_anew = True  # import takes about half a minute
+    import_docs_anew = False  # import takes about 3 minutes
+    import_diaglists_anew = False  # import takes about half a minute
+
+    # test_case_ids[i] <--> test_ta_ids[i]
+    test_on = False
+    test_case_ids = [22225, 23619, 51285]
+    # um id in diaglist zu testen, muss import_diaglists_anew auf True gesetzt werden
+    # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
+    # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
     # TODO LATER replace with meta parameter table, see Melanie
     f.print_steps(f'--- data variables ---'
@@ -138,8 +150,7 @@ if __name__ == "__main__":
                   f'\nsaving_to_csv = {saving_to_csv}',
                   printing_steps)
 
-    main(saving_to_csv, printing_steps, data_input_version_id, random_seed, data_years, start_time, digits,
-         import_docs_anew, import_diaglists_anew)
+    main()
 
     print(f'--- END TIME = {f.print_time(time.time(), digits)} ---')
     print(f'--- RUNNING TIME = {f.get_running_time(start_time, digits)} ---')

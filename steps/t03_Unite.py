@@ -5,10 +5,9 @@ import pandas as pd
 from functions import functions as f
 
 
-def unite_texts_per_case(documents: pd.DataFrame, printing_steps: bool) -> pd.DataFrame:
+def unite_texts_per_case(documents: pd.DataFrame, printing_steps: bool, random_seed: int,
+                         test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
     f.print_steps('uniting texts per case', printing_steps)
-
-    # TODO NOW ensure that the ta id stays the same for the texts of a case (test with one row...)
 
     # Ensure no NaN values interfere with concatenation (I think there are none...)
     documents.loc[:, 'contents'] = documents['contents'].fillna('')

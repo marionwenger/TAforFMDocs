@@ -10,7 +10,7 @@ from functions import functions as f
 
 # TODO LATER generalize methods import and process, so that there is less duplication...
 def import_documents(data_input_version_id, start_time, digits: int,
-                     printing_steps: bool = False) -> pd.DataFrame:
+                     printing_steps: bool) -> pd.DataFrame:
     start_time_import = time.time()
     f.print_steps('import of documents', printing_steps)
 
@@ -56,7 +56,8 @@ def import_documents(data_input_version_id, start_time, digits: int,
     return fm_doc_exports
 
 
-def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_steps: bool = False) -> pd.DataFrame:
+def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_steps: bool,
+                      test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
     f.print_steps('process of documents', printing_steps)
 
     fm_doc_exports.rename(
@@ -64,7 +65,7 @@ def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_s
                  'TextMBSVision': 'contents'}, inplace=True)
 
     # id --> type string
-    fm_doc_exports = f.anonymize_and_index(fm_doc_exports, random_seed)
+    fm_doc_exports = f.anonymize_and_index(fm_doc_exports, random_seed, test_on, test_case_ids)
     # year (second column) --> type int
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 0), axis=1)
     fm_doc_exports['name'] = fm_doc_exports['name'].astype(str)
@@ -75,7 +76,7 @@ def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_s
 
 
 def import_diaglists(data_input_version_id, start_time, digits: int,
-                     printing_steps: bool = False) -> pd.DataFrame:
+                     printing_steps: bool) -> pd.DataFrame:
     start_time_import = time.time()
     f.print_steps('import of diagnoses lists', printing_steps)
 
@@ -137,8 +138,8 @@ def import_diaglists(data_input_version_id, start_time, digits: int,
     return fm_diaglist_exports
 
 
-def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int,
-                      printing_steps: bool = False) -> pd.DataFrame:
+def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, printing_steps: bool,
+                      test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
     f.print_steps('process of diagnoses lists', printing_steps)
 
     fm_diaglist_exports.rename(
@@ -155,7 +156,7 @@ def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int,
         for i in range(1, fm_diaglist_exports.shape[1] - 1):
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
 
-    fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed)
+    fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed, test_on, test_case_ids)
 
     # TODO NOW classify diagnoses & 1-hot encoding (see also R code for Vergleich...)
 
