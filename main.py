@@ -4,7 +4,7 @@ import pandas as pd
 
 import t01_Import as t01
 import t02_Exclude as t02
-import t03_Unite as t03
+import t03_Unite_Encode as t03
 from functions import functions as f
 
 
@@ -56,8 +56,7 @@ def main():
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
         f.print_steps('used former diaglist import', printing_steps)
 
-    # TODO NOW 2 073 Listen von vorher 21 539 Listen - das sind viel zu wenige!!|
-    # TODO NOW ist das der Grund dass ich fast keine Fall mit Dokumenten UND Diagliste finde???
+    # TODO NOW WAIT FOR NEW EXPORT (2 073 Listen von vorher 21 539 FAST NUR LEEREN Listen...)
 
     # %% t03 UNITE
     f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
@@ -65,6 +64,13 @@ def main():
     file_texts_name = f'O_all_texts_exports_{data_input_version_id}'
     f.save_to_csv(texts_per_case, folder_name, file_texts_name, True, saving_to_csv, printing_steps)
     f.print_steps('united texts per case', printing_steps)
+
+    # %% t03 ENCODE
+    f.print_steps('--- t03 ENCODE DIAGNOSES ---', printing_steps)
+    diagvec_per_case = t03.encode_diagnoses(fm_diaglist_exports, diag_defs, printing_steps)
+    file_diagvec_name = f'O_diag_vectors_{data_input_version_id}'
+    f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
+    f.print_steps('encoded diagnoses', printing_steps)
 
     # TODO NEXT split into training and test data, see Melanie
 
@@ -117,7 +123,7 @@ if __name__ == "__main__":
     print(f'--- START TIME = {f.print_time(start_time, digits)} ---')
 
     saving_to_csv = True
-    printing_steps = False
+    printing_steps = True
 
     # TODO CLEANUP do I need this?
     data_input_version_id = 'div_1.0'
@@ -137,6 +143,66 @@ if __name__ == "__main__":
     # um id in diaglist zu testen, muss import_diaglists_anew auf True gesetzt werden
     # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
+
+    diag_defs: list[str] = ['id',  # 0
+                            "LKG",  # 1
+                            "myofunkt. Dysfunk.",  # 2
+                            "Fehlbildung: Div.",  # 3
+                            "Gehirn: Div.",  # 4
+                            "Blutung",  # 5
+                            "CP",  # 6
+                            "Epilepsie",  # 7
+                            "kard. Erkrank.",  # 8
+                            "Audit. Verarbeit./Wahrnehm.stör",  # 9
+                            "Fütter/Essstör",  # 10
+                            "Hörstör (o. CI)",  # 11
+                            "Hörstör mit CI",  # 12
+                            "Schluckstör",  # 13
+                            "Sehstör",  # 14
+                            "Trinkschwäche",  # 15
+                            "Organisch: Div.",  # 16
+                            "Syndrom: Div.",  # 17
+                            "Tris21",  # 18
+                            "Feinmotorik",  # 19
+                            "Grobmotorik",  # 20
+                            "Oralmotorik",  # 21
+                            "Globaler ER",  # 22
+                            "Kognitiver ER",  # 23
+                            "SES expr mehrspr",  # 24
+                            "SES expr mono",  # 25
+                            "SES Komorb mehrspr",  # 26
+                            "SES Komorb mono",  # 27
+                            "SES rezep mehrspr",  # 28
+                            "SES rezep mono",  # 29
+                            "SES rezep expr mehrspr",  # 30
+                            "SES rezep expr mono",  # 31
+                            "SEV expr mehrspr",  # 32
+                            "SEV expr mono",  # 33
+                            "SEV expr rezep mehrspr",  # 34
+                            "SEV expr rezep mono",  # 35
+                            "Sprachentwicklung: Div.",  # 36
+                            "Erworbene Sprachstör",  # 37
+                            "Rhinolalie",  # 38
+                            "Stimmstör",  # 39
+                            "Stottern",  # 40
+                            "Sprachstör: Div.",  # 41
+                            "AD(H)S",  # 42
+                            "ASS",  # 43
+                            "Emotionale/soziale stör",  # 44
+                            "Mutismus",  # 45
+                            "Regulationsstör",  # 46
+                            "Verhalten: Div.",  # 47
+                            "Geburt",  # 48
+                            "Langzeithospital.",  # 49
+                            "Umfeldproblematik",  # 50
+                            "Risikofaktoren: Div.",  # 51
+                            "Div. Diagnosen",  # 52
+                            "Dyskalkulie",  # 53
+                            "Isolierte Lesestör",  # 54
+                            "Isolierte Rechtschreibstör",  # 55
+                            "Dyslexie",  # 56
+                            "Schule: Div."  # 57]
+                            ]
 
     # TODO LATER replace with meta parameter table, see Melanie
     f.print_steps(f'--- data variables ---'

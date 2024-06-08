@@ -150,6 +150,4 @@ def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, print
 
     fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed, test_on, test_case_ids)
 
-    # TODO NOW classify diagnoses & 1-hot encoding (see also R code for Vergleich...)
-
     return fm_diaglist_exports

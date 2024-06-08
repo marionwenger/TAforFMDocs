@@ -382,3 +382,4 @@ zstandard @ file:///Users/ec2-user/ci_py311_2/zstandard_1679338593428/work
 
 beautifulsoup4~=4.12.3
 lxml~=5.2.1
+numpy~=1.26.4
