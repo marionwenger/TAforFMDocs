@@ -1,5 +1,4 @@
 import time
-import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -148,13 +147,6 @@ def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, print
 
     fm_diaglist_exports['id'] = fm_diaglist_exports['id'].apply(f.convert_to_int)
     fm_diaglist_exports = fm_diaglist_exports.loc[fm_diaglist_exports['id'] != 0]
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore")
-        # SettingWithCopyWarning:
-        # A value is trying to be set on a copy of a slice from a DataFrame.
-        # Try using .loc[row_indexer,col_indexer] = value instead"
-        for i in range(1, fm_diaglist_exports.shape[1] - 1):
-            fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
 
     fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed, test_on, test_case_ids)
 

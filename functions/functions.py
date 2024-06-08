@@ -107,3 +107,4 @@ def convert_to_int(value) -> int:
     except ValueError:
         # If conversion fails, return:
         return 0
+        # The value is either a date or an empty string without attached diagnoses...
