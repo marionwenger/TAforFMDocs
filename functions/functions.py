@@ -5,7 +5,6 @@ import time
 import warnings
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 from pandas import isna
 
@@ -113,15 +112,19 @@ def convert_to_int(value) -> int:
 
 def get_warm_diaglist(row: pd.Series) -> pd.Series:  # not really one-hot, because it is the sum of one-hot vectors
     # corresponds to global variable diag_defs # TODO LATER test correspondence
-    zeros = np.zeros(57, dtype=int)
-    case_id: str = row[0]  # anonymized case id (string)
-    new_row = pd.Series(case_id, zeros)  # TODO NOW append zeros with loop
-    string_list = ''
 
+    case_id: str = row.iloc[0]  # anonymized case id (string)
+    new_row = [case_id]
+    for i in range(1, 58):
+        new_row.append(int(0))
+
+    string_list = ''
     for column in range(1, len(row)):  # TODO LATER we needn't have separated the diagnoses into different columns,
         #  but it is easier to human-read like it is.
         #  Nevertheless, may be it should be avoided?
-        string_list = string_list + ' ' + row[column]
+        diagnosis = row.iloc[column]
+        if not isna(diagnosis) and diagnosis.lower() != 'nan':
+            string_list = string_list + ' ' + diagnosis
 
         # TODO LATER for kispi usage update diagnose definitions here
     #  (Methode ist eine Kopie vom 'Vergleich'-Projekt mit Stand Ende November 2023)
@@ -298,3 +301,11 @@ def get_warm_diaglist(row: pd.Series) -> pd.Series:  # not really one-hot, becau
         new_row[57] = 1
 
     return pd.Series(new_row)
+
+
+def split_in_dependents(target_col: str, df: pd.DataFrame) -> pd.DataFrame | pd.DataFrame:
+    columns = df.columns.tolist()
+    columns.remove(target_col)
+    df_x: pd.DataFrame = pd.DataFrame(df, columns=columns)
+    df_y: pd.DataFrame = pd.DataFrame(df, columns=list([target_col]))
+    return df_x, df_y

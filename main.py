@@ -56,7 +56,7 @@ def main():
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
         f.print_steps('used former diaglist import', printing_steps)
 
-    # TODO NOW WAIT FOR NEW EXPORT (2 073 Listen von vorher 21 539 FAST NUR LEEREN Listen...)
+    # TODO NOW WAIT FOR NEW EXPORT (2 073 Listen von vorher 21 539 FAST NUR LEERE Listen...)
 
     # %% t03 UNITE
     f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
@@ -72,7 +72,12 @@ def main():
     f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
     f.print_steps('encoded diagnoses', printing_steps)
 
-    # TODO NEXT split into training and test data, see Melanie
+    # TODO NOW unite texts and diagnoses in one table, so that there is an entry in both for each row...
+    #  (handle empty diaglists!!!)
+    # TODO NOW then use split_in_dependents(target_col: str, df: pd.DataFrame)
+    # ValueError: Found input variables with inconsistent numbers of samples: [19374, 2073]
+    # x_train, x_test, y_train_true, y_test_true = train_test_split(texts_per_case, diagvec_per_case,
+    # test_size=test_size, random_state=random_seed)
 
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
@@ -215,6 +220,9 @@ if __name__ == "__main__":
                   f'\nimport_diaglists_anew = {import_diaglists_anew}'
                   f'\nsaving_to_csv = {saving_to_csv}',
                   printing_steps)
+    # TODO LATER print number of data rows...
+
+    test_size: float = 0.33
 
     main()
 
