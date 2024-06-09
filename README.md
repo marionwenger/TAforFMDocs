@@ -14,9 +14,13 @@
 
 ### Diagnosenlisten
 
-- **Suchkriterien** * bei Fall_ID und Diagnosen im Fall, = bei Testeintrag
+- **Suchkriterien** bei Fall_ID und Diagnosen im Fall, = bei Testeintrag
 - **Export** 21 539 Diagnoselisten (eine Liste pro Fall) (240518)
 - 2 073 anonymisierte Diagnosenlisten (FM-Export war sehr sparse wegen Verbindungsproblematik)
 
+### Modellheuristik - welche Vorraussagengüte erwarte ich?
+
+- **Erstanmeldungen**
+- **Massnahmenüberprüfungen** 
 
 
