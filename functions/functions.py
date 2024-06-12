@@ -309,9 +309,19 @@ def get_hot_diagnoses(row: pd.Series) -> pd.Series:  # not really one-hot, becau
     return pd.Series(new_row)
 
 
-def split_in_dependents(target_col: str, df: pd.DataFrame) -> pd.DataFrame | pd.DataFrame:
-    columns = df.columns.tolist()
-    columns.remove(target_col)
-    df_x: pd.DataFrame = pd.DataFrame(df, columns=columns)
-    df_y: pd.DataFrame = pd.DataFrame(df, columns=list([target_col]))
+def split_in_dependents(target_col_first: int, df: pd.DataFrame) -> pd.DataFrame | pd.DataFrame:
+    # TODO LATER assert: x columns are the first ones, y columns are the last ones...
+    cols_x = df.columns.tolist()
+    cols_y = df.columns.tolist()
+
+    # target_range = range(target_col_first, target_col_last + 1)
+    # columns = list(set(columns)-set(target_range))
+    # columns.remove(target_range)
+
+    del cols_x[target_col_first:]
+    del cols_y[:target_col_first + 1]
+
+    df_x: pd.DataFrame = pd.DataFrame(df, columns=cols_x)
+    df_y: pd.DataFrame = pd.DataFrame(df, columns=cols_y)
+
     return df_x, df_y

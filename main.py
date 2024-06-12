@@ -1,6 +1,7 @@
 import time
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 import t01_Import as t01
 import t02_Exclude as t02
@@ -76,17 +77,19 @@ def main():
     # inner join on index, but keep index
     texts_per_case['copy_index'] = texts_per_case.index
     combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, left_index=True, right_index=True)
+    # TODO LATER for kispi usage - check why so few rows remain...
     combined_data.rename(columns={'copy_index': 'id'}, inplace=True)
     combined_data.set_index('id', inplace=True)
     combined_data = f.anonymize_and_index(combined_data, random_seed, test_on, test_case_ids)
     file_modell_input_name = f'O_modell_input_{data_input_version_id}'
     f.save_to_csv(combined_data, folder_name, file_modell_input_name, False, saving_to_csv, printing_steps)
-    print(combined_data.head())
-    # TODO NOW combined rows too few: anonymize ids after combination, work with case id until then
-    # TODO NOW use split_in_dependents(target_col: str, df: pd.DataFrame) and train_test_split
-    # ValueError: Found input variables with inconsistent numbers of samples: [19374, 2073]
-    # x_train, x_test, y_train_true, y_test_true = train_test_split(texts_per_case, diagvec_per_case,
-    # test_size=test_size, random_state=random_seed)
+    if printing_steps: print(combined_data.head())
+    target_col_first = 1
+    df_x, df_y = f.split_in_dependents(target_col_first, combined_data)
+    x_train, x_test, y_train_true, y_test_true = train_test_split(df_x, df_y, test_size=test_size,
+                                                                  random_state=random_seed)
+    if printing_steps: print(x_train.head())
+    if printing_steps: print(y_train_true.head())
 
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
