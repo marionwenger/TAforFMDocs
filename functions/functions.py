@@ -30,17 +30,19 @@ def read_from_csv(folder_name: str, file_name: str, printing_steps: bool) -> pd.
 
 def generate_ta_id(id: int, test_on: bool, test_case_ids: list[int]) -> str:
     if id == 0:
-        return ''
+        ta_id = ''
     elif isna(id):
         raise Exception(f"generate_ta_id: id isna")
-    random.seed(id)  # 'id' is the random seed for each row
-    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    else:
+        random.seed(id)  # 'id' is the random seed for each row
+        random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        ta_id = f'TA-{random_chars}'
     # test #
     if test_on:
         for case_id in test_case_ids:
             if id == case_id:
-                print(f'generate_ta_id: id = {id}, ta_id = TA-{random_chars}')
-    return f'TA-{random_chars}'
+                print(f'generate_ta_id: id = {id}, ta_id = {ta_id}')
+    return ta_id
 
 
 def get_running_time(start_time, digits: int) -> str:
@@ -60,15 +62,19 @@ def get_and_check_year_from_FM_date(row: pd.Series, date_format, column_nr: int)
         return date_int
 
 
-# TODO LATER include check if there is a column called 'id'...(or include code step renaming given column to 'id')
 def anonymize_and_index(df: pd.DataFrame, random_seed: int,
                         test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
+    # TODO LATER assert column 'id' exists...
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore")
         # SettingWithCopyWarning:
         # A value is trying to be set on a copy of a slice from a DataFrame.
         # Try using .loc[row_indexer,col_indexer] = value instead"
-        df['id'] = df.id.apply(generate_ta_id, args=[test_on, test_case_ids])  # id is the random seed for each row
+
+        # cannot use apply on index
+        df.reset_index(inplace=True)
+        df['id'] = df['id'].apply(generate_ta_id, args=(test_on, test_case_ids))  # id is the random seed for each row
+
     df = df.sample(frac=1, ignore_index=True, random_state=random_seed)  # random seed is only used for reordering
     df.set_index('id', inplace=True)
     return df
@@ -113,13 +119,13 @@ def convert_to_int(value) -> int:
 def get_hot_diagnoses(row: pd.Series) -> pd.Series:  # not really one-hot, because it is the sum of one-hot vectors
     # corresponds to global variable diag_defs # TODO LATER test correspondence
 
-    case_id: str = row.iloc[0]  # anonymized case id (string)
-    new_row = [case_id]
+    new_row = ['']
     for i in range(1, 58):
         new_row.append(int(0))
 
     string_list = ''
-    for column in range(1, len(row)):  # TODO LATER we needn't have separated the diagnoses into different columns,
+    # with new export the "Status" like "Verdacht" or "gesichert' is also read as a diagnosis, but this does not matter
+    for column in range(len(row)):  # TODO LATER we needn't have separated the diagnoses into different columns,
         #  but it is easier to human-read like it is.
         #  Nevertheless, may be it should be avoided?
         diagnosis = row.iloc[column]

@@ -70,8 +70,17 @@ def main():
     f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
     f.print_steps('encoded diagnoses', printing_steps)
 
-    # keep only texts with given diagnoses...
-    combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, on='id')
+    # prepare for merge
+    texts_per_case.index = texts_per_case.index.astype(str)
+    diagvec_per_case.index = diagvec_per_case.index.astype(str)
+    # inner join on index, but keep index
+    texts_per_case['copy_index'] = texts_per_case.index
+    combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, left_index=True, right_index=True)
+    combined_data.rename(columns={'copy_index': 'id'}, inplace=True)
+    combined_data.set_index('id', inplace=True)
+    combined_data = f.anonymize_and_index(combined_data, random_seed, test_on, test_case_ids)
+    file_modell_input_name = f'O_modell_input_{data_input_version_id}'
+    f.save_to_csv(combined_data, folder_name, file_modell_input_name, False, saving_to_csv, printing_steps)
     print(combined_data.head())
     # TODO NOW combined rows too few: anonymize ids after combination, work with case id until then
     # TODO NOW use split_in_dependents(target_col: str, df: pd.DataFrame) and train_test_split
@@ -150,7 +159,7 @@ if __name__ == "__main__":
     # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
-    diag_defs: list[str] = ['id',  # 0
+    diag_defs: list[str] = ['empty',  # 0  # TODO LATER remove and change indices accordingly...
                             "LKG",  # 1
                             "myofunkt. Dysfunk.",  # 2
                             "Fehlbildung: Div.",  # 3

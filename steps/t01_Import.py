@@ -64,9 +64,7 @@ def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_s
     fm_doc_exports.rename(
         columns={"ID_Fall": "id", 'fAnmeldedatum': 'year', 'filename': 'name', 'TextMBSVisionLength': 'length',
                  'TextMBSVision': 'contents'}, inplace=True)
-
-    # id --> type string
-    fm_doc_exports = f.anonymize_and_index(fm_doc_exports, random_seed, test_on, test_case_ids)
+    fm_doc_exports.set_index('id', inplace=True)
     # year (second column) --> type int
     fm_doc_exports['year'] = fm_doc_exports.apply(f.get_and_check_year_from_FM_date, args=('%d/%m/%Y', 0), axis=1)
     fm_doc_exports['name'] = fm_doc_exports['name'].astype(str)
@@ -150,7 +148,6 @@ def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, print
 
     fm_diaglist_exports['id'] = fm_diaglist_exports['id'].apply(f.convert_to_int)
     fm_diaglist_exports = fm_diaglist_exports.loc[fm_diaglist_exports['id'] != 0]
-
-    fm_diaglist_exports = f.anonymize_and_index(fm_diaglist_exports, random_seed, test_on, test_case_ids)
+    fm_diaglist_exports.set_index('id', inplace=True)
 
     return fm_diaglist_exports
