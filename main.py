@@ -56,8 +56,6 @@ def main():
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
         f.print_steps('used former diaglist import', printing_steps)
 
-    # TODO NOW WAIT FOR NEW EXPORT (2 073 Listen von vorher 21 539 FAST NUR LEERE Listen...)
-
     # %% t03 UNITE
     f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
     texts_per_case = t03.unite_texts_per_case(documents, printing_steps, random_seed, test_on, test_case_ids)
@@ -73,8 +71,7 @@ def main():
     f.print_steps('encoded diagnoses', printing_steps)
 
     # TODO NOW unite texts and diagnoses in one table, so that there is an entry in both for each row...
-    #  (handle empty diaglists!!!)
-    # TODO NOW then use split_in_dependents(target_col: str, df: pd.DataFrame)
+    #  then use split_in_dependents(target_col: str, df: pd.DataFrame)
     # ValueError: Found input variables with inconsistent numbers of samples: [19374, 2073]
     # x_train, x_test, y_train_true, y_test_true = train_test_split(texts_per_case, diagvec_per_case,
     # test_size=test_size, random_state=random_seed)
@@ -130,17 +127,18 @@ if __name__ == "__main__":
     saving_to_csv = True
     printing_steps = True
 
-    # TODO CLEANUP do I need this?
-    data_input_version_id = 'div_1.0'
+    # TODO LATER different ids for diaglists and docs
+    data_input_version_id = 'div_1.1'  # only different for diaglists: 1.0 Marions Export 1.1 Emis Export (200610)
     data_version_id = 1
 
     random_seed: int = 1404
     current_year = int(time.strftime("%Y"))
     data_years = [2013, current_year]
+    # TODO LATER improve predictions by separating Vor-/Nachschule
 
     # False = parsing already done (it's time-consuming...)
     import_docs_anew = False  # import takes about 3 minutes
-    import_diaglists_anew = False  # import takes about half a minute
+    import_diaglists_anew = False  # import takes 8 seconds (used to take half a minute with data input version 1.0)
 
     # test_case_ids[i] <--> test_ta_ids[i]
     test_on = False
@@ -149,7 +147,7 @@ if __name__ == "__main__":
     # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
-    diag_defs: list[str] = ['id',  # 0
+    diag_defs: list[str] = ['empty',  # 0 # TODO LATER remove
                             "LKG",  # 1
                             "myofunkt. Dysfunk.",  # 2
                             "Fehlbildung: Div.",  # 3

@@ -34,7 +34,5 @@ def encode_diagnoses(diag_lists: pd.DataFrame, diag_defs: list[str], printing_st
     f.print_steps('warm-encoding diagnoses', printing_steps)
     diagvec_per_case = diag_lists.apply(f.get_warm_diaglist, axis=1)
     diagvec_per_case.columns = diag_defs
-    diagvec_per_case.set_index(
-        ['id'])  # TODO NOW somehow this does not work, but maybe it is solve via uniting the tables...
 
     return diagvec_per_case

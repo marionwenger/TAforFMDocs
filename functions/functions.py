@@ -113,8 +113,7 @@ def convert_to_int(value) -> int:
 def get_warm_diaglist(row: pd.Series) -> pd.Series:  # not really one-hot, because it is the sum of one-hot vectors
     # corresponds to global variable diag_defs # TODO LATER test correspondence
 
-    case_id: str = row.iloc[0]  # anonymized case id (string)
-    new_row = [case_id]
+    new_row = ['']  # TODO LATER remove empty column...
     for i in range(1, 58):
         new_row.append(int(0))
 
@@ -126,7 +125,7 @@ def get_warm_diaglist(row: pd.Series) -> pd.Series:  # not really one-hot, becau
         if not isna(diagnosis) and diagnosis.lower() != 'nan':
             string_list = string_list + ' ' + diagnosis
 
-        # TODO LATER for kispi usage update diagnose definitions here
+    # TODO LATER for kispi usage update diagnose definitions here
     #  (Methode ist eine Kopie vom 'Vergleich'-Projekt mit Stand Ende November 2023)
 
     if "LKG" in string_list:

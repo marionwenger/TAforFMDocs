@@ -10,6 +10,8 @@ from functions import functions as f
 # TODO LATER generalize methods import and process, so that there is less duplication...
 def import_documents(data_input_version_id, start_time, digits: int,
                      printing_steps: bool) -> pd.DataFrame:
+    # TODO LATER assert no empty texts
+
     start_time_import = time.time()
     f.print_steps('import of documents', printing_steps)
 
@@ -76,13 +78,14 @@ def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_s
 
 def import_diaglists(data_input_version_id, start_time, digits: int,
                      printing_steps: bool) -> pd.DataFrame:
+    # TODO LATER assert no empty diaglists
     start_time_import = time.time()
     f.print_steps('import of diagnoses lists', printing_steps)
 
     file_path_data = Path(f'data/I_diaglist_exports_{data_input_version_id}.htm')
     f.print_steps('filepath is ' + str(file_path_data), printing_steps)
 
-    with open(file_path_data, "r", encoding='utf-8') as file:
+    with open(file_path_data, "r", encoding='ISO-8859-1') as file:  # data input version 1.0 used 'utf-8'
         f.print_steps('with opened', printing_steps)
         soup = BeautifulSoup(file, "html.parser")  # lxml?
         f.print_steps('soup cooked', printing_steps)

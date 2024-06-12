@@ -20,7 +20,12 @@
 
 ### Modellheuristik - welche Vorraussagengüte erwarte ich?
 
-- **Erstanmeldungen**
-- **Massnahmenüberprüfungen** 
+Bei den Fällen im Jahr 2023 war es so, dass total 48% der Fälle aufgrund der Dokumente,
+also ohne das Kind zusätzlich zu sehen, entschieden wurden. Das kann in den vorderen Jahren natürlich anders
+gewesen sein, trotzdem bleibt wohl **50%** die obere Schranke für ein Modell, mehr wird nicht zu erreichen sein.
+
+Bzw. - wird mehr erreicht, dann liegt es daran, dass noch zu viele Dokumente als Input genommen wurden, welche zum
+Zeitpunkt der Entscheidung noch gar nicht vorhanden waren...
+
 
 
