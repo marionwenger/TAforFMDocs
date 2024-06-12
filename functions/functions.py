@@ -110,10 +110,11 @@ def convert_to_int(value) -> int:
         # The value is either a date or an empty string without attached diagnoses...
 
 
-def get_warm_diaglist(row: pd.Series) -> pd.Series:  # not really one-hot, because it is the sum of one-hot vectors
+def get_hot_diagnoses(row: pd.Series) -> pd.Series:  # not really one-hot, because it is the sum of one-hot vectors
     # corresponds to global variable diag_defs # TODO LATER test correspondence
 
-    new_row = ['']  # TODO LATER remove empty column...
+    case_id: str = row.iloc[0]  # anonymized case id (string)
+    new_row = [case_id]
     for i in range(1, 58):
         new_row.append(int(0))
 

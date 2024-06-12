@@ -31,8 +31,9 @@ def unite_texts_per_case(documents: pd.DataFrame, printing_steps: bool, random_s
 
 
 def encode_diagnoses(diag_lists: pd.DataFrame, diag_defs: list[str], printing_steps: bool) -> pd.DataFrame:
-    f.print_steps('warm-encoding diagnoses', printing_steps)
-    diagvec_per_case = diag_lists.apply(f.get_warm_diaglist, axis=1)
+    f.print_steps('hot-encoding diagnoses', printing_steps)
+    diagvec_per_case = diag_lists.apply(f.get_hot_diagnoses, axis=1)
     diagvec_per_case.columns = diag_defs
+    diagvec_per_case.set_index('id', inplace=True)
 
     return diagvec_per_case

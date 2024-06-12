@@ -70,8 +70,11 @@ def main():
     f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
     f.print_steps('encoded diagnoses', printing_steps)
 
-    # TODO NOW unite texts and diagnoses in one table, so that there is an entry in both for each row...
-    #  then use split_in_dependents(target_col: str, df: pd.DataFrame)
+    # keep only texts with given diagnoses...
+    combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, on='id')
+    print(combined_data.head())
+    # TODO NOW combined rows too few: anonymize ids after combination, work with case id until then
+    # TODO NOW use split_in_dependents(target_col: str, df: pd.DataFrame) and train_test_split
     # ValueError: Found input variables with inconsistent numbers of samples: [19374, 2073]
     # x_train, x_test, y_train_true, y_test_true = train_test_split(texts_per_case, diagvec_per_case,
     # test_size=test_size, random_state=random_seed)
@@ -147,7 +150,7 @@ if __name__ == "__main__":
     # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
-    diag_defs: list[str] = ['empty',  # 0 # TODO LATER remove
+    diag_defs: list[str] = ['id',  # 0
                             "LKG",  # 1
                             "myofunkt. Dysfunk.",  # 2
                             "Fehlbildung: Div.",  # 3
