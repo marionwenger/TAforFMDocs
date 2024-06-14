@@ -319,7 +319,7 @@ def split_in_dependents(target_col_first: int, df: pd.DataFrame) -> pd.DataFrame
     # columns.remove(target_range)
 
     del cols_x[target_col_first:]
-    del cols_y[:target_col_first + 1]
+    del cols_y[:target_col_first]
 
     df_x: pd.DataFrame = pd.DataFrame(df, columns=cols_x)
     df_y: pd.DataFrame = pd.DataFrame(df, columns=cols_y)

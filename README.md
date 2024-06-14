@@ -10,7 +10,7 @@
 
 ### Texte
 
-- 19374 Texte (vereinte Dokumente pro Fall), d.h. 1.85 Dokumente ohne die Empfehlung pro Kind
+- 19 374 Texte (vereinte Dokumente pro Fall), d.h. 1.85 Dokumente ohne die Empfehlung pro Kind
 
 ### Diagnosenlisten
 

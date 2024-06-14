@@ -73,16 +73,18 @@ def main(diag_defs: list[str]):
     f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
     f.print_steps('encoded diagnoses', printing_steps)
 
-    # prepare for merge
     texts_per_case.index = texts_per_case.index.astype(str)
     diagvec_per_case.index = diagvec_per_case.index.astype(str)
+    texts_per_case = f.anonymize_and_index(texts_per_case, random_seed, test_on, test_case_ids)
+    diagvec_per_case = f.anonymize_and_index(diagvec_per_case, random_seed, test_on, test_case_ids)
+    # TODO LATER for kispi usage - check why so few rows remain... (see README for the numbers)
+    merged_ids = sorted(set(texts_per_case.index) & set(diagvec_per_case.index))
+    print(f'nr of common ta ids in texts and diaglists is {len(merged_ids)}')
+
+    # prepare for merge
+
     # inner join on index, but keep index
-    texts_per_case['copy_index'] = texts_per_case.index
     combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, left_index=True, right_index=True)
-    # TODO LATER for kispi usage - check why so few rows remain...
-    combined_data.rename(columns={'copy_index': 'id'}, inplace=True)
-    combined_data.set_index('id', inplace=True)
-    combined_data = f.anonymize_and_index(combined_data, random_seed, test_on, test_case_ids)
     file_modell_input_name = f'O_modell_input_{data_input_version_id}'
     f.save_to_csv(combined_data, folder_name, file_modell_input_name, False, saving_to_csv, printing_steps)
 
@@ -98,7 +100,7 @@ def main(diag_defs: list[str]):
     y_test_true = y_test_true[existing_diagnoses]
     diag_defs = sorted(set(diag_defs) & set(existing_diagnoses), key=diag_defs.index)
 
-    # TODO NOW why are there so few rows??? 514 in training, 254 in testing...
+    # almost 10 minutes
     modell_f1_scores, modell_predictions = t04.diagnosis_prediction_dict(diag_defs, x_train, x_test,
                                                                          y_train_true, y_test_true, printing_steps)
 
@@ -106,6 +108,7 @@ def main(diag_defs: list[str]):
     f.print_steps('f1 scores per diagnosis', printing_steps)
     f.print_steps('f1 = 1.0 means that there was no positive sample and no training', printing_steps)
     if printing_steps: pprint.pp(modell_f1_scores)
+    # TODO NOW save results to (Pandas and) csv
 
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
@@ -158,14 +161,14 @@ if __name__ == "__main__":
     saving_to_csv = True
     printing_steps = True
 
-    # TODO LATER different ids for diaglists and docs
+    # TODO LATER different version ids for diaglists and docs
     data_input_version_id = 'div_1.1'  # only different for diaglists: 1.0 Marions Export 1.1 Emis Export (200610)
     data_version_id = 1
 
     random_seed: int = 1404
     current_year = int(time.strftime("%Y"))
     data_years = [2013, current_year]
-    # TODO LATER improve predictions by separating Vor-/Nachschule
+    # TODO NOW or LATER improve predictions by separating Vor-/Nachschule
 
     # False = parsing already done (it's time-consuming...)
     import_docs_anew = False  # import takes about 3 minutes
@@ -178,8 +181,8 @@ if __name__ == "__main__":
     # bei docs hingegen nicht, da dort die ID-Generierung erst später stattfindet
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
-    diag_defs: list[str] = ['empty',  # 0  # TODO LATER remove and change indices accordingly...
-                            "LKG",  # 1  # TODO LATER for kispi usage - "LKG" is missing as a column, see main()
+    diag_defs: list[str] = ['empty',  # 0  # TODO LATER remove here and change indices in method accordingly...
+                            "LKG",  # 1
                             "myofunkt. Dysfunk.",  # 2
                             "Fehlbildung: Div.",  # 3
                             "Gehirn: Div.",  # 4
@@ -222,7 +225,7 @@ if __name__ == "__main__":
                             "Sprachstör: Div.",  # 41
                             "AD(H)S",  # 42
                             "ASS",  # 43
-                            "Emotionale/soziale stör",  # 44
+                            "Emotionale/soziale Stör",  # 44
                             "Mutismus",  # 45
                             "Regulationsstör",  # 46
                             "Verhalten: Div.",  # 47
@@ -249,7 +252,6 @@ if __name__ == "__main__":
                   f'\nimport_diaglists_anew = {import_diaglists_anew}'
                   f'\nsaving_to_csv = {saving_to_csv}',
                   printing_steps)
-    # TODO LATER print number of data rows...
 
     test_size: float = 0.33
 

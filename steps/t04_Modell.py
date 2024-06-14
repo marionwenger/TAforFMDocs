@@ -56,9 +56,9 @@ def diagnosis_prediction_dict(diag_defs: list[str], x_train: pd.DataFrame, x_tes
     for diagnosis in diag_defs:
         train_labels = pd.Series(y_train_true[diagnosis])
         test_labels = pd.Series(y_test_true[diagnosis])
+        print(diagnosis)
         diagnosis_prediction, diagnosis_f1 = predict_log_regr(x_train, x_test, train_labels, test_labels)
         modell_predictions[diagnosis] = diagnosis_prediction
-        # TODO LATER ta_id is gone...
         modell_f1_scores[diagnosis] = diagnosis_f1
 
     return modell_f1_scores, modell_predictions
