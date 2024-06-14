@@ -1,3 +1,4 @@
+import pprint
 import time
 
 import pandas as pd
@@ -6,10 +7,11 @@ from sklearn.model_selection import train_test_split
 import t01_Import as t01
 import t02_Exclude as t02
 import t03_Unite_Encode as t03
+import t04_Modell as t04
 from functions import functions as f
 
 
-def main():
+def main(diag_defs: list[str]):
     f.print_steps('--- MAIN ---', printing_steps)
 
     # DOCUMENTS
@@ -83,13 +85,27 @@ def main():
     combined_data = f.anonymize_and_index(combined_data, random_seed, test_on, test_case_ids)
     file_modell_input_name = f'O_modell_input_{data_input_version_id}'
     f.save_to_csv(combined_data, folder_name, file_modell_input_name, False, saving_to_csv, printing_steps)
-    if printing_steps: print(combined_data.head())
+
+    # prepare for modell
     target_col_first = 1
     df_x, df_y = f.split_in_dependents(target_col_first, combined_data)
     x_train, x_test, y_train_true, y_test_true = train_test_split(df_x, df_y, test_size=test_size,
                                                                   random_state=random_seed)
-    if printing_steps: print(x_train.head())
-    if printing_steps: print(y_train_true.head())
+
+    # remove diagnoses which do not occur in test data
+    y_train_true = y_train_true.loc[:, (y_train_true != 0).any(axis=0)]
+    existing_diagnoses = y_train_true.columns
+    y_test_true = y_test_true[existing_diagnoses]
+    diag_defs = sorted(set(diag_defs) & set(existing_diagnoses), key=diag_defs.index)
+
+    # TODO NOW why are there so few rows??? 514 in training, 254 in testing...
+    modell_f1_scores, modell_predictions = t04.diagnosis_prediction_dict(diag_defs, x_train, x_test,
+                                                                         y_train_true, y_test_true, printing_steps)
+
+    f.print_steps('--- sklearn.LogisticRegression ---', printing_steps)
+    f.print_steps('f1 scores per diagnosis', printing_steps)
+    f.print_steps('f1 = 1.0 means that there was no positive sample and no training', printing_steps)
+    if printing_steps: pprint.pp(modell_f1_scores)
 
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
@@ -163,7 +179,7 @@ if __name__ == "__main__":
     # test_ta_ids = ['TA-MZZ3EI', 'TA-4X4219', 'TA-HNT0K0'] # TODO LATER set up test
 
     diag_defs: list[str] = ['empty',  # 0  # TODO LATER remove and change indices accordingly...
-                            "LKG",  # 1
+                            "LKG",  # 1  # TODO LATER for kispi usage - "LKG" is missing as a column, see main()
                             "myofunkt. Dysfunk.",  # 2
                             "Fehlbildung: Div.",  # 3
                             "Gehirn: Div.",  # 4
@@ -237,7 +253,7 @@ if __name__ == "__main__":
 
     test_size: float = 0.33
 
-    main()
+    main(diag_defs)
 
     print(f'--- END TIME = {f.print_time(time.time(), digits)} ---')
     print(f'--- RUNNING TIME = {f.get_running_time(start_time, digits)} ---')
