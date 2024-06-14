@@ -5,9 +5,9 @@ import pandas as pd
 from functions import functions as f
 
 
-def unite_texts_per_case(documents: pd.DataFrame, printing_steps: bool, random_seed: int,
+def unite_texts_per_case(documents: pd.DataFrame, printing_if: bool, random_seed: int,
                          test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
-    f.print_steps('uniting texts per case', printing_steps)
+    f.print_if('uniting texts per case', printing_if)
 
     # Ensure no NaN values interfere with concatenation (I think there are none...)
     documents.loc[:, 'contents'] = documents['contents'].fillna('')
@@ -30,8 +30,8 @@ def unite_texts_per_case(documents: pd.DataFrame, printing_steps: bool, random_s
     return texts_per_case
 
 
-def encode_diagnoses(diag_lists: pd.DataFrame, diag_defs: list[str], printing_steps: bool) -> pd.DataFrame:
-    f.print_steps('hot-encoding diagnoses', printing_steps)
+def encode_diagnoses(diag_lists: pd.DataFrame, diag_defs: list[str], printing_if: bool) -> pd.DataFrame:
+    f.print_if('hot-encoding diagnoses', printing_if)
     diagvec_per_case = diag_lists.apply(f.get_hot_diagnoses, axis=1)
     diagvec_per_case['id'] = diag_lists['id']
     diagvec_per_case.columns = diag_defs + ['id']

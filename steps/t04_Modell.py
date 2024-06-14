@@ -1,5 +1,6 @@
 # TODO LATER for kispi usage - anonymize data (names, adresses, etc.) and use model ONLINE
 
+import time
 import warnings
 
 import numpy as np
@@ -11,7 +12,8 @@ from sklearn.metrics import f1_score
 from functions import functions as f
 
 
-def predict_log_regr(x_train: pd.DataFrame, x_test: pd.DataFrame, train_labels: pd.Series, test_labels: pd.Series) \
+def predict_log_regr_per_diagn(x_train: pd.DataFrame, x_test: pd.DataFrame, train_labels: pd.Series,
+                               test_labels: pd.Series) \
         -> pd.DataFrame | float:
     # L03P05 Text Classification with Word Embeddings
     # Run a TF-IDF + LogReg baseline on the data
@@ -41,24 +43,31 @@ def predict_log_regr(x_train: pd.DataFrame, x_test: pd.DataFrame, train_labels: 
         #  Use `zero_division` parameter to control this behavior.
         # TODO LATER read other metrics directly or via report
         # class_report_tf_log_reg = classification_report(test_labels, predicted_labels_tf_log_reg, zero_division=np.nan)
-        # if printing_steps: print(class_report_tf_log_reg)
+        # if printing_if: print(class_report_tf_log_reg)
         f1_tf_log_reg = f1_score(test_labels, predicted_labels_tf_log_reg, average='macro', zero_division=np.nan)
 
     return pd.DataFrame({'predicted_labels': predicted_labels_tf_log_reg}), f1_tf_log_reg
 
 
-def diagnosis_prediction_dict(diag_defs: list[str], x_train: pd.DataFrame, x_test: pd.DataFrame,
-                              y_train_true: pd.DataFrame, y_test_true: pd.DataFrame, printing_steps: bool) \
+def predict_log_regr(diag_defs: list[str], x_train: pd.DataFrame, x_test: pd.DataFrame,
+                     y_train_true: pd.DataFrame, y_test_true: pd.DataFrame, printing_if: bool,
+                     start_time, digits) \
         -> tuple[dict, dict]:
-    modell_f1_scores: dict = {}
-    modell_predictions: dict = {}
-    f.print_steps('start prediction with logistic regression', printing_steps)
+    start_time_prediction = time.time()
+    log_regr_f1_scores: dict = {}
+    log_regr__predictions: dict = {}
+    f.print_if('start prediction with logistic regression', printing_if)
+
     for diagnosis in diag_defs:
         train_labels = pd.Series(y_train_true[diagnosis])
         test_labels = pd.Series(y_test_true[diagnosis])
-        print(diagnosis)
-        diagnosis_prediction, diagnosis_f1 = predict_log_regr(x_train, x_test, train_labels, test_labels)
-        modell_predictions[diagnosis] = diagnosis_prediction
-        modell_f1_scores[diagnosis] = diagnosis_f1
+        diagnosis_prediction, diagnosis_f1 = predict_log_regr_per_diagn(x_train, x_test, train_labels, test_labels)
+        log_regr__predictions[diagnosis] = diagnosis_prediction
+        log_regr_f1_scores[diagnosis] = diagnosis_f1
+        f.print_if(f'diagnosis "{diagnosis}" predicted after {f.get_running_time(start_time, digits)}'
+                   , printing_if)
 
-    return modell_f1_scores, modell_predictions
+    f.print_if(f'predicted all diagnoses after {f.get_running_time(start_time, digits)}', printing_if)
+    f.print_if(f'prediction took {f.get_running_time(start_time_prediction, digits)}', printing_if)
+
+    return log_regr_f1_scores, log_regr__predictions

@@ -9,11 +9,11 @@ from functions import functions as f
 
 # TODO LATER generalize methods import and process, so that there is less duplication...
 def import_documents(data_input_version_id, start_time, digits: int,
-                     printing_steps: bool) -> pd.DataFrame:
+                     printing_if: bool) -> pd.DataFrame:
     # TODO LATER assert no empty texts
 
     start_time_import = time.time()
-    f.print_steps('import of documents', printing_steps)
+    f.print_if('import of documents', printing_if)
 
     # Load the HTML file
     # file_path_data = Path(f'data/kleines_Test_File.htm')
@@ -25,20 +25,20 @@ def import_documents(data_input_version_id, start_time, digits: int,
     file_path_data = Path(f'data/I_doc_exports_{data_input_version_id}.htm')
     # 209.541 seconds / 218.644 seconds - added printout while parsing / 477.247 seconds - changed to UTF-8 /
     # 8.74 minutes (break point included)
-    f.print_steps('filepath is ' + str(file_path_data), printing_steps)
+    f.print_if('filepath is ' + str(file_path_data), printing_if)
 
     export_doc_columns = ['ID_FM', 'ID_Fall', 'fAnmeldedatum', 'filename', 'TextMBSVisionLength', 'TextMBSVision']
     fm_doc_exports = pd.DataFrame(columns=export_doc_columns)
 
     with open(file_path_data, "r", encoding='utf-8') as file:  # did not work: 'iso-8859-1'      ?'latin-1'
-        f.print_steps('with opened', printing_steps)
+        f.print_if('with opened', printing_if)
         soup = BeautifulSoup(file, "lxml")  # 'html.parser' is too slow
-        f.print_steps('soup cooked', printing_steps)
+        f.print_if('soup cooked', printing_if)
 
-    f.print_steps('with closed', printing_steps)
+    f.print_if('with closed', printing_if)
     rows = soup.find_all("tr")
     counter = 0
-    f.print_steps(f'started importing rows after {f.get_running_time(start_time, digits)}', printing_steps)
+    f.print_if(f'started importing rows after {f.get_running_time(start_time, digits)}', printing_if)
     for row in rows:
         cells = row.find_all("td")
         if len(cells) >= 1:
@@ -46,20 +46,20 @@ def import_documents(data_input_version_id, start_time, digits: int,
             row_data = [cell.get_text(strip=True) for cell in cells]
             fm_doc_exports.loc[len(fm_doc_exports)] = row_data
             if counter % 5000 == 0:
-                f.print_steps(f'{counter} rows imported after {f.get_running_time(start_time, digits)}'
-                              , printing_steps)
-    f.print_steps(f'imported all rows after {f.get_running_time(start_time, digits)}', printing_steps)
-    f.print_steps(f'import took {f.get_running_time(start_time_import, digits)}', printing_steps)
-    f.print_steps('documents in pandas dataframe', printing_steps)
-    f.print_steps(fm_doc_exports.head(), printing_steps)
+                f.print_if(f'{counter} rows imported after {f.get_running_time(start_time, digits)}'
+                           , printing_if)
+    f.print_if(f'imported all rows after {f.get_running_time(start_time, digits)}', printing_if)
+    f.print_if(f'import took {f.get_running_time(start_time_import, digits)}', printing_if)
+    f.print_if('documents in pandas dataframe', printing_if)
+    f.print_if(fm_doc_exports.head(), printing_if)
     fm_doc_exports.drop(['ID_FM'], axis=1, inplace=True)  # dismiss child ID
 
     return fm_doc_exports
 
 
-def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_steps: bool,
+def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_if: bool,
                       test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
-    f.print_steps('process of documents', printing_steps)
+    f.print_if('process of documents', printing_if)
 
     fm_doc_exports.rename(
         columns={"ID_Fall": "id", 'fAnmeldedatum': 'year', 'filename': 'name', 'TextMBSVisionLength': 'length',
@@ -75,20 +75,20 @@ def process_documents(fm_doc_exports: pd.DataFrame, random_seed: int, printing_s
 
 
 def import_diaglists(data_input_version_id, start_time, digits: int,
-                     printing_steps: bool) -> pd.DataFrame:
+                     printing_if: bool) -> pd.DataFrame:
     # TODO LATER assert no empty diaglists
     start_time_import = time.time()
-    f.print_steps('import of diagnoses lists', printing_steps)
+    f.print_if('import of diagnoses lists', printing_if)
 
     file_path_data = Path(f'data/I_diaglist_exports_{data_input_version_id}.htm')
-    f.print_steps('filepath is ' + str(file_path_data), printing_steps)
+    f.print_if('filepath is ' + str(file_path_data), printing_if)
 
     with open(file_path_data, "r", encoding='ISO-8859-1') as file:  # data input version 1.0 used 'utf-8'
-        f.print_steps('with opened', printing_steps)
+        f.print_if('with opened', printing_if)
         soup = BeautifulSoup(file, "html.parser")  # lxml?
-        f.print_steps('soup cooked', printing_steps)
+        f.print_if('soup cooked', printing_if)
 
-    f.print_steps('with closed', printing_steps)
+    f.print_if('with closed', printing_if)
 
     # Parse the HTML content using BeautifulSoup
     table = soup.find('table')
@@ -119,7 +119,7 @@ def import_diaglists(data_input_version_id, start_time, digits: int,
     # Flatten the rows to match the new headers
     flattened_rows = []
     counter = 0
-    f.print_steps(f'started importing rows after {f.get_running_time(start_time, digits)}', printing_steps)
+    f.print_if(f'started importing rows after {f.get_running_time(start_time, digits)}', printing_if)
     for row in rows:
         counter = counter + 1
         new_row = row
@@ -127,20 +127,20 @@ def import_diaglists(data_input_version_id, start_time, digits: int,
         new_row.extend(extension)  # Extend the row to match the max length
         flattened_rows.append(new_row)
         if counter % 3000 == 0:
-            f.print_steps(f'{counter} rows imported after {f.get_running_time(start_time, digits)}'
-                          , printing_steps)
-    f.print_steps(f'imported all rows after {f.get_running_time(start_time, digits)}', printing_steps)
-    f.print_steps(f'import took {f.get_running_time(start_time_import, digits)}', printing_steps)
+            f.print_if(f'{counter} rows imported after {f.get_running_time(start_time, digits)}'
+                       , printing_if)
+    f.print_if(f'imported all rows after {f.get_running_time(start_time, digits)}', printing_if)
+    f.print_if(f'import took {f.get_running_time(start_time_import, digits)}', printing_if)
     fm_diaglist_exports = pd.DataFrame(flattened_rows, columns=new_headers)
-    f.print_steps('diagnoses lists in pandas dataframe', printing_steps)
-    f.print_steps(fm_diaglist_exports.head(), printing_steps)
+    f.print_if('diagnoses lists in pandas dataframe', printing_if)
+    f.print_if(fm_diaglist_exports.head(), printing_if)
 
     return fm_diaglist_exports
 
 
-def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, printing_steps: bool,
+def process_diaglists(fm_diaglist_exports: pd.DataFrame, random_seed: int, printing_if: bool,
                       test_on: bool, test_case_ids: list[int]) -> pd.DataFrame:
-    f.print_steps('process of diagnoses lists', printing_steps)
+    f.print_if('process of diagnoses lists', printing_if)
 
     fm_diaglist_exports.rename(
         columns={"ID_Fall": "id", 'fDiagnosen': 'diag_list'}, inplace=True)

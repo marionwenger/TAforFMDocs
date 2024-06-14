@@ -1,4 +1,3 @@
-import pprint
 import time
 
 import pandas as pd
@@ -12,81 +11,81 @@ from functions import functions as f
 
 
 def main(diag_defs: list[str]):
-    f.print_steps('--- MAIN ---', printing_steps)
+    f.print_if('--- MAIN ---', printing_if)
 
     # DOCUMENTS
-    folder_name = 'intermed_results'
+    folder_intermed_name = 'intermed_results'
     file_doc_name = f'O_all_doc_exports_{data_input_version_id}'
     file_diaglist_name = f'O_all_diaglist_exports_{data_input_version_id}'
 
-    f.print_steps('--- t01 IMPORT & PROCESS DOCUMENTS ---', printing_steps)
+    f.print_if('--- t01 IMPORT & PROCESS DOCUMENTS ---', printing_if)
     if import_docs_anew:
         # %% t01 IMPORT
-        fm_doc_exports = t01.import_documents(data_input_version_id, start_time, digits, printing_steps)
-        f.print_steps('imported fm exports', printing_steps)
-        f.save_to_csv(fm_doc_exports, folder_name, file_doc_name, False, saving_to_csv,
-                      printing_steps)
+        fm_doc_exports = t01.import_documents(data_input_version_id, start_time, digits, printing_if)
+        f.print_if('imported fm exports', printing_if)
+        f.save_to_csv(fm_doc_exports, folder_intermed_name, file_doc_name, False, saving_to_csv,
+                      printing_if)
     else:
         # parsing already done
-        fm_doc_exports = f.read_from_csv(folder_name, file_doc_name, printing_steps)
-        f.print_steps('used former documents import', printing_steps)
+        fm_doc_exports = f.read_from_csv(folder_intermed_name, file_doc_name, printing_if)
+        f.print_if('used former documents import', printing_if)
 
-    fm_doc_exports = t01.process_documents(fm_doc_exports, random_seed, printing_steps,
+    fm_doc_exports = t01.process_documents(fm_doc_exports, random_seed, printing_if,
                                            test_on, test_case_ids)
-    f.print_steps('processed documents', printing_steps)
+    f.print_if('processed documents', printing_if)
 
     # t02 %% EXCLUDE recommendations
-    f.print_steps('--- t02 EXCLUDE DOCUMENTS---', printing_steps)
-    documents = t02.exclude(fm_doc_exports, printing_steps)
-    f.print_steps('excluded internally generated documents', printing_steps)
+    f.print_if('--- t02 EXCLUDE DOCUMENTS---', printing_if)
+    documents = t02.exclude(fm_doc_exports, printing_if)
+    f.print_if('excluded internally generated documents', printing_if)
 
     # DIAGNOSES LISTS
-    f.print_steps('--- t01 IMPORT & PROCESS DIAGLISTS ---', printing_steps)
+    f.print_if('--- t01 IMPORT & PROCESS DIAGLISTS ---', printing_if)
     if import_diaglists_anew:
         # %% t01 IMPORT
         fm_diaglist_exports: pd.DataFrame = t01.import_diaglists(data_input_version_id, start_time, digits,
-                                                                 printing_steps)
-        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, random_seed, printing_steps,
+                                                                 printing_if)
+        fm_diaglist_exports = t01.process_diaglists(fm_diaglist_exports, random_seed, printing_if,
                                                     test_on, test_case_ids)
-        f.print_steps('processed diag lists', printing_steps)
-        f.save_to_csv(fm_diaglist_exports, folder_name, file_diaglist_name, True, saving_to_csv,
-                      printing_steps)
+        f.print_if('processed diag lists', printing_if)
+        f.save_to_csv(fm_diaglist_exports, folder_intermed_name, file_diaglist_name, True, saving_to_csv,
+                      printing_if)
     else:  # TODO LATER rearrange code with methods so there are less duplicated statements
         # parsing already done
-        fm_diaglist_exports = f.read_from_csv(folder_name, file_diaglist_name, printing_steps)
+        fm_diaglist_exports = f.read_from_csv(folder_intermed_name, file_diaglist_name, printing_if)
         fm_diaglist_exports['id'] = fm_diaglist_exports['id'].astype(str)
         for i in range(1, fm_diaglist_exports.shape[1] - 1):
             fm_diaglist_exports[f'diag_{i}'] = fm_diaglist_exports[f'diag_{i}'].astype(str)
-        f.print_steps('used former diaglist import', printing_steps)
+        f.print_if('used former diaglist import', printing_if)
 
     # %% t03 UNITE
-    f.print_steps('--- t03 UNITE TEXTS PER CASE ---', printing_steps)
-    texts_per_case = t03.unite_texts_per_case(documents, printing_steps, random_seed, test_on, test_case_ids)
+    f.print_if('--- t03 UNITE TEXTS PER CASE ---', printing_if)
+    texts_per_case = t03.unite_texts_per_case(documents, printing_if, random_seed, test_on, test_case_ids)
     file_texts_name = f'O_all_texts_exports_{data_input_version_id}'
-    f.save_to_csv(texts_per_case, folder_name, file_texts_name, True, saving_to_csv, printing_steps)
-    f.print_steps('united texts per case', printing_steps)
+    f.save_to_csv(texts_per_case, folder_intermed_name, file_texts_name, True, saving_to_csv, printing_if)
+    f.print_if('united texts per case', printing_if)
 
     # %% t03 ENCODE
-    f.print_steps('--- t03 ENCODE DIAGNOSES ---', printing_steps)
-    diagvec_per_case = t03.encode_diagnoses(fm_diaglist_exports, diag_defs, printing_steps)
+    f.print_if('--- t03 ENCODE DIAGNOSES ---', printing_if)
+    diagvec_per_case = t03.encode_diagnoses(fm_diaglist_exports, diag_defs, printing_if)
     file_diagvec_name = f'O_diag_vectors_{data_input_version_id}'
-    f.save_to_csv(diagvec_per_case, folder_name, file_diagvec_name, False, saving_to_csv, printing_steps)
-    f.print_steps('encoded diagnoses', printing_steps)
+    f.save_to_csv(diagvec_per_case, folder_intermed_name, file_diagvec_name, False, saving_to_csv, printing_if)
+    f.print_if('encoded diagnoses', printing_if)
 
     texts_per_case.index = texts_per_case.index.astype(str)
     diagvec_per_case.index = diagvec_per_case.index.astype(str)
-    texts_per_case = f.anonymize_and_index(texts_per_case, random_seed, test_on, test_case_ids)
-    diagvec_per_case = f.anonymize_and_index(diagvec_per_case, random_seed, test_on, test_case_ids)
+    texts_per_case = f.anonymize_and_index(texts_per_case, random_seed, test_on, test_case_ids, printing_if)
+    diagvec_per_case = f.anonymize_and_index(diagvec_per_case, random_seed, test_on, test_case_ids, printing_if)
     # TODO LATER for kispi usage - check why so few rows remain... (see README for the numbers)
     merged_ids = sorted(set(texts_per_case.index) & set(diagvec_per_case.index))
-    print(f'nr of common ta ids in texts and diaglists is {len(merged_ids)}')
+    f.print_if(f'nr of common ta ids in texts and diaglists is {len(merged_ids)}', printing_if)
 
     # prepare for merge
 
     # inner join on index, but keep index
     combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, left_index=True, right_index=True)
     file_modell_input_name = f'O_modell_input_{data_input_version_id}'
-    f.save_to_csv(combined_data, folder_name, file_modell_input_name, False, saving_to_csv, printing_steps)
+    f.save_to_csv(combined_data, folder_intermed_name, file_modell_input_name, False, saving_to_csv, printing_if)
 
     # prepare for modell
     target_col_first = 1
@@ -95,21 +94,39 @@ def main(diag_defs: list[str]):
                                                                   random_state=random_seed)
 
     # remove diagnoses which do not occur in test data
-    y_train_true = y_train_true.loc[:, (y_train_true != 0).any(axis=0)]
+    y_train_true = pd.DataFrame(y_train_true.loc[:, (y_train_true != 0).any(axis=0)])
+    if only_one_diag_run:
+        y_train_true = pd.DataFrame(y_train_true[y_train_true.columns[0]])
     existing_diagnoses = y_train_true.columns
     y_test_true = y_test_true[existing_diagnoses]
+    f.print_if(f'nr of diagnoses with a positive sample is {len(existing_diagnoses)}', printing_if)
     diag_defs = sorted(set(diag_defs) & set(existing_diagnoses), key=diag_defs.index)
 
-    # almost 10 minutes
-    modell_f1_scores, modell_predictions = t04.diagnosis_prediction_dict(diag_defs, x_train, x_test,
-                                                                         y_train_true, y_test_true, printing_steps)
+    folder_final_name = 'meta_data'
+    file_log_regr_pred_name = f'O_log_regr_pred_{data_input_version_id}'
+    file_log_regr_f1_name = f'O_log_regr_f1_{data_input_version_id}'
+    # TODO NOW (dict -> df) does not work (to save the results of log regr)
+    # if predict_log_regr_anew:
+    log_regr_f1_scores, log_regr_predictions = t04.predict_log_regr(diag_defs, x_train, x_test,
+                                                                    y_train_true, y_test_true, printing_if,
+                                                                    start_time, digits)
 
-    f.print_steps('--- sklearn.LogisticRegression ---', printing_steps)
-    f.print_steps('f1 scores per diagnosis', printing_steps)
-    f.print_steps('f1 = 1.0 means that there was no positive sample and no training', printing_steps)
-    if printing_steps: pprint.pp(modell_f1_scores)
-    # TODO NOW save results to (Pandas and) csv
+    f.print_if('--- sklearn.LogisticRegression Results ---', printing_if)
+    f.print_if('f1 scores per diagnosis', printing_if)
+    f.print_if('f1 = 1.0 means that there was no positive sample and no training', printing_if)
+    f.print_if(log_regr_f1_scores, printing_if, True)
 
+    #     log_regr_pred = pd.DataFrame.from_dict(log_regr_predictions)
+    #     log_regr_f1 = pd.DataFrame.from_dict(log_regr_f1_scores)
+    #     f.save_to_csv(log_regr_pred, folder_intermed_name, file_log_regr_pred_name, True, saving_to_csv, printing_if)
+    #     f.save_to_csv(log_regr_f1, folder_final_name, file_log_regr_f1_name, True, saving_to_csv, printing_if)
+    #
+    # else:
+    #     log_regr_pred = f.read_from_csv(folder_intermed_name, file_log_regr_pred_name, printing_if)
+    #     log_regr_f1 =  f.read_from_csv(folder_final_name, file_log_regr_f1_name, printing_if)
+    #     log_regr_pred['id'] = log_regr_pred['id'].astype(str)
+    #     log_regr_f1['id'] = log_regr_f1['id'].astype(str)
+    #     f.print_if('used former log regr predictions', printing_if)
     # %% TODO LATER add tests for steps
     # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
     #                                 , 'z-transformed (SimpleImputer)', 'one-hot'
@@ -159,7 +176,7 @@ if __name__ == "__main__":
     print(f'--- START TIME = {f.print_time(start_time, digits)} ---')
 
     saving_to_csv = True
-    printing_steps = True
+    printing_if = True
 
     # TODO LATER different version ids for diaglists and docs
     data_input_version_id = 'div_1.1'  # only different for diaglists: 1.0 Marions Export 1.1 Emis Export (200610)
@@ -241,8 +258,13 @@ if __name__ == "__main__":
                             "Schule: Div."  # 57]
                             ]
 
+    test_size: float = 0.33
+
+    only_one_diag_run: bool = True  # predict only one diagnoses
+    predict_log_regr_anew = True  # prediction takes almost 10 minutes
+
     # TODO LATER replace with meta parameter table, see Melanie
-    f.print_steps(f'--- data variables ---'
+    f.print_if(f'--- data variables ---'
                   f'\ndata_years = {data_years[0]} - {data_years[1]} '
                   f'\ndata_input_version_id = {data_input_version_id} '
                   f'\ndata_version_id = {data_version_id} '
@@ -250,10 +272,13 @@ if __name__ == "__main__":
                   f'\nrandom_seed = {random_seed} '
                   f'\nimport_docs_anew = {import_docs_anew} '
                   f'\nimport_diaglists_anew = {import_diaglists_anew}'
-                  f'\nsaving_to_csv = {saving_to_csv}',
-                  printing_steps)
-
-    test_size: float = 0.33
+               f'\nsaving_to_csv = {saving_to_csv}'
+               f'\ntest_on = {test_on}'
+               f'\ntest_case_ids = {test_case_ids}'
+               f'\ntest_size = {test_size}'
+               f'\nonly_one_diag_run = {only_one_diag_run}'
+               f'\npredict_log_regr_anew = {predict_log_regr_anew}',
+               printing_if)
 
     main(diag_defs)
 
