@@ -1,6 +1,7 @@
 import time
 
 import pandas as pd
+from pandas import isna
 from sklearn.model_selection import train_test_split
 
 import t01_Import as t01
@@ -38,6 +39,7 @@ def main(diag_defs: list[str]):
     f.print_if('--- t02 EXCLUDE DOCUMENTS---', printing_if)
     documents = t02.exclude(fm_doc_exports, printing_if)
     f.print_if('excluded internally generated documents', printing_if)
+    # TODO LATER for kispi usage - only include sur dossier Fälle!
 
     # DIAGNOSES LISTS
     f.print_if('--- t01 IMPORT & PROCESS DIAGLISTS ---', printing_if)
@@ -72,6 +74,8 @@ def main(diag_defs: list[str]):
     f.save_to_csv(diagvec_per_case, folder_intermed_name, file_diagvec_name, False, saving_to_csv, printing_if)
     f.print_if('encoded diagnoses', printing_if)
 
+    # %% t04 MODELL
+    # prepare for merge
     texts_per_case.index = texts_per_case.index.astype(str)
     diagvec_per_case.index = diagvec_per_case.index.astype(str)
     texts_per_case = f.anonymize_and_index(texts_per_case, random_seed, test_on, test_case_ids, printing_if)
@@ -79,8 +83,6 @@ def main(diag_defs: list[str]):
     # TODO LATER for kispi usage - check why so few rows remain... (see README for the numbers)
     merged_ids = sorted(set(texts_per_case.index) & set(diagvec_per_case.index))
     f.print_if(f'nr of common ta ids in texts and diaglists is {len(merged_ids)}', printing_if)
-
-    # prepare for merge
 
     # inner join on index, but keep index
     combined_data: pd.DataFrame = pd.merge(texts_per_case, diagvec_per_case, left_index=True, right_index=True)
@@ -95,79 +97,36 @@ def main(diag_defs: list[str]):
 
     # remove diagnoses which do not occur in test data
     y_train_true = pd.DataFrame(y_train_true.loc[:, (y_train_true != 0).any(axis=0)])
-    if only_one_diag_run:
-        y_train_true = pd.DataFrame(y_train_true[y_train_true.columns[0]])
+    if not isna(only_run_some_diag):
+        y_train_true = pd.DataFrame(y_train_true[y_train_true.columns[:only_run_some_diag]])
     existing_diagnoses = y_train_true.columns
     y_test_true = y_test_true[existing_diagnoses]
     f.print_if(f'nr of diagnoses with a positive sample is {len(existing_diagnoses)}', printing_if)
+    # TODO LATER nr of positive samples for each diagnosis as a reference point for the f1 score
     diag_defs = sorted(set(diag_defs) & set(existing_diagnoses), key=diag_defs.index)
 
     folder_final_name = 'meta_data'
-    file_log_regr_pred_name = f'O_log_regr_pred_{data_input_version_id}'
     file_log_regr_f1_name = f'O_log_regr_f1_{data_input_version_id}'
-    # TODO NOW (dict -> df) does not work (to save the results of log regr)
-    # if predict_log_regr_anew:
-    log_regr_f1_scores, log_regr_predictions = t04.predict_log_regr(diag_defs, x_train, x_test,
+
+    if predict_log_regr_anew:
+        log_regr_f1_scores, log_regr_predictions = t04.predict_log_regr(diag_defs, x_train, x_test,
                                                                     y_train_true, y_test_true, printing_if,
                                                                     start_time, digits)
 
-    f.print_if('--- sklearn.LogisticRegression Results ---', printing_if)
-    f.print_if('f1 scores per diagnosis', printing_if)
-    f.print_if('f1 = 1.0 means that there was no positive sample and no training', printing_if)
-    f.print_if(log_regr_f1_scores, printing_if, True)
+        f.print_if('--- sklearn.LogisticRegression Results ---', printing_if)
+        f.print_if('f1 scores per diagnosis', printing_if)
+        f.print_if('f1 = 1.0 means that there was no positive sample and no training', printing_if)
+        f.print_if(log_regr_f1_scores, printing_if, True)
 
-    #     log_regr_pred = pd.DataFrame.from_dict(log_regr_predictions)
-    #     log_regr_f1 = pd.DataFrame.from_dict(log_regr_f1_scores)
-    #     f.save_to_csv(log_regr_pred, folder_intermed_name, file_log_regr_pred_name, True, saving_to_csv, printing_if)
-    #     f.save_to_csv(log_regr_f1, folder_final_name, file_log_regr_f1_name, True, saving_to_csv, printing_if)
-    #
-    # else:
-    #     log_regr_pred = f.read_from_csv(folder_intermed_name, file_log_regr_pred_name, printing_if)
-    #     log_regr_f1 =  f.read_from_csv(folder_final_name, file_log_regr_f1_name, printing_if)
-    #     log_regr_pred['id'] = log_regr_pred['id'].astype(str)
-    #     log_regr_f1['id'] = log_regr_f1['id'].astype(str)
-    #     f.print_if('used former log regr predictions', printing_if)
-    # %% TODO LATER add tests for steps
-    # data_processes.add_data_process(m03.data_process_id, 'No', 'mean'
-    #                                 , 'z-transformed (SimpleImputer)', 'one-hot'
-    #                                 , 'No', m03.test_size, 'no test of normal distribution, no check of outliers')
-    #
-    # tests.add_test_result(f' <= {tests.miss_factor}% of missing values per column'
-    #                       , tf.test_for_few_nans(m03.kids_x, tests.miss_factor, data_name))
-    # tests.add_test_result('all rows are put into the modell'
-    #                       , math.floor(len(m02.kids) * (1 - m03.test_size)) == len(m03.x_train))
+        log_regr_f1 = pd.DataFrame.from_dict(log_regr_f1_scores, orient='index', dtype=float, columns=['f1_log_regr'])
+        f.save_to_csv(log_regr_f1, folder_final_name, file_log_regr_f1_name, True, saving_to_csv, printing_if)
 
-    # %% TODO LATER import modell steps
-    # import steps.m04_Mod_Poly_Reg as m04
-    #
-    # if not m04.m04_train_all:
-    #     bad_modells.extend(m04.m04_bad_modells)
-    #
-    # # modell 001
-    # if m04.modell_id_001 not in bad_modells:
-    #     modells.add_modell(m04.modell_id_001, m04.modell_name_001, 'poly regr', f'degree {m04.poly_degree_001}'
-    #                        , m04.nr_params_001, f'No, shift {m04.y_shift_001}, sigmoid & round'
-    #                        , 'Alisa recommended starting with degree 2, no more')
-    #
-    #     evals.add_eval(m04.eval_id_001, m02.data_version_id, m03.data_process_id, m03.random_seed, m04.modell_id_001,
-    #                    m04.acc_001
-    #                    , 'very frustrating for my first modell ever...')
-
-    # %% TODO LATER meta data tables
-    # data_versions: mf.DataVersionTable = mf.DataVersionTable()
-    # data_processes: mf.DataProcessTable = mf.DataProcessTable()
-    # tests: tf.TestTable = tf.TestTable(66)  # miss factor
-    # modells: mf.ModellTable = mf.ModellTable()
-    # evals: mf.EvalTable = mf.EvalTable(4)  # precision in digits
-    # bad_modells: list[int] = []  # are not trained and printed
-
-    # TODO LATER print meta tables
-    # mf.print_meta_tables(data_versions, data_processes, tests, modells, evals, bad_modells,
-    #                      print_modells=True)
-
-    # TODO LATER save meta tables
-    # filepath_data_versions = Path(f'meta_data/MI_data_versions_{data_versions.get_print_version()}.csv')
-    # data_versions.df.to_csv(filepath_data_versions)
+    else:
+        log_regr_f1 = f.read_from_csv(folder_final_name, file_log_regr_f1_name, printing_if)
+        log_regr_f1.columns = ['id', 'f1_log_regr']
+        log_regr_f1['id'] = log_regr_f1['id'].astype(str)
+        log_regr_f1.set_index('id', inplace=True)
+        f.print_if('used former log regr predictions', printing_if)
 
 
 if __name__ == "__main__":
@@ -185,7 +144,7 @@ if __name__ == "__main__":
     random_seed: int = 1404
     current_year = int(time.strftime("%Y"))
     data_years = [2013, current_year]
-    # TODO NOW or LATER improve predictions by separating Vor-/Nachschule
+    # TODO LATER improve predictions by separating Vor-/Nachschule
 
     # False = parsing already done (it's time-consuming...)
     import_docs_anew = False  # import takes about 3 minutes
@@ -260,8 +219,8 @@ if __name__ == "__main__":
 
     test_size: float = 0.33
 
-    only_one_diag_run: bool = True  # predict only one diagnoses
-    predict_log_regr_anew = True  # prediction takes almost 10 minutes
+    only_run_some_diag = None  # predict only x diagnoses, set None for all diagnoses
+    predict_log_regr_anew = False  # prediction takes almost 10 minutes
 
     # TODO LATER replace with meta parameter table, see Melanie
     f.print_if(f'--- data variables ---'
@@ -276,7 +235,7 @@ if __name__ == "__main__":
                f'\ntest_on = {test_on}'
                f'\ntest_case_ids = {test_case_ids}'
                f'\ntest_size = {test_size}'
-               f'\nonly_one_diag_run = {only_one_diag_run}'
+               f'\nonly_run_some_diag = {only_run_some_diag}'
                f'\npredict_log_regr_anew = {predict_log_regr_anew}',
                printing_if)
 
