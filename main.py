@@ -40,6 +40,8 @@ def main(diag_defs: list[str]):
     documents = t02.exclude(fm_doc_exports, printing_if)
     f.print_if('excluded internally generated documents', printing_if)
     # TODO LATER for kispi usage - only include sur dossier Fälle!
+    # TODO LATER Zusammenhang sur dossier und Diagnose anschauen!
+
 
     # DIAGNOSES LISTS
     f.print_if('--- t01 IMPORT & PROCESS DIAGLISTS ---', printing_if)
