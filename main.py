@@ -109,9 +109,12 @@ def main(diag_defs: list[str]):
 
     folder_final_name = 'meta_data'
     file_log_regr_f1_name = f'O_log_regr_f1_{data_input_version_id}'
+    file_log_regr_acc_name = f'O_log_regr_acc_{data_input_version_id}'
+    file_log_regr_recall_name = f'O_log_regr_recall_{data_input_version_id}'
 
     if predict_log_regr_anew:
-        log_regr_f1_scores, log_regr_predictions = t04.predict_log_regr(diag_defs, x_train, x_test,
+        log_regr_f1_scores, log_regr_acc_scores, log_regr_recall_scores, log_regr_predictions = t04.predict_log_regr(
+            diag_defs, x_train, x_test,
                                                                     y_train_true, y_test_true, printing_if,
                                                                     start_time, digits)
 
@@ -119,9 +122,18 @@ def main(diag_defs: list[str]):
         f.print_if('f1 scores per diagnosis', printing_if)
         f.print_if('f1 = 1.0 means that there was no positive sample and no training', printing_if)
         f.print_if(log_regr_f1_scores, printing_if, True)
+        f.print_if(log_regr_acc_scores, printing_if, True)
+        f.print_if(log_regr_recall_scores, printing_if, True)
 
         log_regr_f1 = pd.DataFrame.from_dict(log_regr_f1_scores, orient='index', dtype=float, columns=['f1_log_regr'])
         f.save_to_csv(log_regr_f1, folder_final_name, file_log_regr_f1_name, True, saving_to_csv, printing_if)
+
+        log_reg_acc = pd.DataFrame.from_dict(log_regr_acc_scores, orient='index', dtype=float, columns=['acc_log_regr'])
+        f.save_to_csv(log_reg_acc, folder_final_name, file_log_regr_acc_name, True, saving_to_csv, printing_if)
+
+        log_reg_recall = pd.DataFrame.from_dict(log_regr_recall_scores, orient='index', dtype=float,
+                                                columns=['recall_log_regr'])
+        f.save_to_csv(log_reg_recall, folder_final_name, file_log_regr_recall_name, True, saving_to_csv, printing_if)
 
     else:
         log_regr_f1 = f.read_from_csv(folder_final_name, file_log_regr_f1_name, printing_if)
