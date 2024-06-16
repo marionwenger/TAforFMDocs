@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/meta_data/O_log_regr_f1_div_1.1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

@@ -75,6 +75,8 @@ def main(diag_defs: list[str]):
     f.print_if('encoded diagnoses', printing_if)
 
     # %% t04 MODELL
+
+    # LOGISTIC REGRESSION
     # prepare for merge
     texts_per_case.index = texts_per_case.index.astype(str)
     diagvec_per_case.index = diagvec_per_case.index.astype(str)
@@ -128,6 +130,10 @@ def main(diag_defs: list[str]):
         log_regr_f1.set_index('id', inplace=True)
         f.print_if('used former log regr predictions', printing_if)
 
+    # RANDOM FOREST
+    # https://medium.com/@tenzin_ngodup/simple-text-classification-using-random-forest-fe230be1e857
+    # TODO LATER does not work...
+    # rand_forest_results = t04.predict_rand_forest(x_train, x_test, y_train_true)
 
 if __name__ == "__main__":
     start_time = time.time()

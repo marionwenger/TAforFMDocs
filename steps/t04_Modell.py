@@ -5,6 +5,8 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
@@ -55,14 +57,14 @@ def predict_log_regr(diag_defs: list[str], x_train: pd.DataFrame, x_test: pd.Dat
         -> tuple[dict, dict]:
     start_time_prediction = time.time()
     log_regr_f1_scores: dict = {}
-    log_regr__predictions: dict = {}
+    log_regr_predictions: dict = {}
     f.print_if('start prediction with logistic regression', printing_if)
 
     for diagnosis in diag_defs:
         train_labels = pd.Series(y_train_true[diagnosis])
         test_labels = pd.Series(y_test_true[diagnosis])
         diagnosis_prediction, diagnosis_f1 = predict_log_regr_per_diagn(x_train, x_test, train_labels, test_labels)
-        log_regr__predictions[diagnosis] = diagnosis_prediction
+        log_regr_predictions[diagnosis] = diagnosis_prediction
         log_regr_f1_scores[diagnosis] = diagnosis_f1
         f.print_if(f'diagnosis "{diagnosis}" predicted after {f.get_running_time(start_time, digits)}'
                    , printing_if)
@@ -70,4 +72,22 @@ def predict_log_regr(diag_defs: list[str], x_train: pd.DataFrame, x_test: pd.Dat
     f.print_if(f'predicted all diagnoses after {f.get_running_time(start_time, digits)}', printing_if)
     f.print_if(f'prediction took {f.get_running_time(start_time_prediction, digits)}', printing_if)
 
-    return log_regr_f1_scores, log_regr__predictions
+    return log_regr_f1_scores, log_regr_predictions
+
+
+def predict_rand_forest(x_train, x_test, y_train_true) -> dict:
+    corpus = x_train['contents'].to_list()
+    Y = np.array(y_train_true).ravel()  # TODO LATER generalize for more than one dimension/diagnosis
+    existing_diagnoses = y_train_true.columns
+    # Creating bag-of-words using CountVectorizer
+    vectorizer = CountVectorizer(min_df=1)
+    X = vectorizer.fit_transform(corpus).toarray()
+    clf = RandomForestClassifier()
+    clf.fit(X, Y)  # TODO LATER this takes hours - is it stuck??? no error messages...
+    rand_forest_results: dict = {}
+    for row in x_test:
+        rand_forest_predictions: dict = {}
+        for diagnosis in existing_diagnoses:
+            rand_forest_predictions[diagnosis] = clf.predict(vectorizer.transform(row['contents']).toarray())
+        rand_forest_results[row.index] = rand_forest_predictions
+    return rand_forest_results
